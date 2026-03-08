@@ -1038,24 +1038,24 @@
         <div class="glass-card rounded-2xl p-8 shadow-teal" style="border:1px solid rgba(0,229,190,0.1);">
           <h3 style="font-weight:700;font-size:1.25rem;color:#E2EAF8;margin-bottom:1.5rem;letter-spacing:-0.02em;" data-i18n="contact.form.title">Send Us a Message</h3>
 
-          <form id="contact-form" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:16px;">
+          <form id="contact-form" action="https://formspree.io/f/mdawkwgk" method="POST" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:16px;">
             <div class="grid sm:grid-cols-2 gap-4">
               <div>
                 <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.name">Name</label>
-                <input type="text" data-i18n-ph="contact.name.ph" placeholder="Your name" class="form-input" required>
+                <input type="text" name="name" data-i18n-ph="contact.name.ph" placeholder="Your name" class="form-input" required>
               </div>
               <div>
                 <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.email">Email</label>
-                <input type="email" data-i18n-ph="contact.email.ph" placeholder="your@email.com" class="form-input" required>
+                <input type="email" name="email" data-i18n-ph="contact.email.ph" placeholder="your@email.com" class="form-input" required>
               </div>
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;"><span data-i18n="contact.company">Company</span> <span style="color:#5C6B8A;font-weight:400;" data-i18n="contact.optional">(optional)</span></label>
-              <input type="text" data-i18n-ph="contact.company.ph" placeholder="Your company" class="form-input">
+              <input type="text" name="company" data-i18n-ph="contact.company.ph" placeholder="Your company" class="form-input">
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.interest">I'm interested in</label>
-              <select class="form-input" id="service-select" style="appearance:none;cursor:pointer;">
+              <select name="service" class="form-input" id="service-select" style="appearance:none;cursor:pointer;">
                 <option value="" data-i18n-opt="contact.opt0">Select a service...</option>
                 <option value="automation" data-i18n-opt="contact.opt1">Business Automation</option>
                 <option value="advertising" data-i18n-opt="contact.opt2">Performance Advertising</option>
@@ -1065,7 +1065,7 @@
             </div>
             <div>
               <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.msg">Message</label>
-              <textarea rows="4" data-i18n-ph="contact.msg.ph" placeholder="Tell us about your project..." class="form-input" style="resize:vertical;" required></textarea>
+              <textarea name="message" rows="4" data-i18n-ph="contact.msg.ph" placeholder="Tell us about your project..." class="form-input" style="resize:vertical;" required></textarea>
             </div>
             <button type="submit" class="btn-primary" id="submit-btn" style="width:100%;justify-content:center;font-size:1rem;" data-i18n="contact.submit">
               Send Message
@@ -1164,16 +1164,45 @@
     });
 
     // Contact form
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
-      btn.innerHTML = 'Message Sent! <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      btn.style.background = 'linear-gradient(135deg,#00B896 0%,#00A0E0 100%)';
-      setTimeout(() => {
-        btn.innerHTML = 'Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        btn.style.background = '';
-        e.target.reset();
-      }, 3500);
+      const form = e.target;
+      btn.disabled = true;
+      btn.innerHTML = 'Sending... <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          btn.innerHTML = 'Message Sent! <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          btn.style.background = 'linear-gradient(135deg,#00B896 0%,#00A0E0 100%)';
+          form.reset();
+          setTimeout(() => {
+            btn.innerHTML = 'Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 3500);
+        } else {
+          btn.innerHTML = 'Try Again <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          btn.style.background = 'linear-gradient(135deg,#FF6B4A 0%,#c0392b 100%)';
+          setTimeout(() => {
+            btn.innerHTML = 'Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            btn.style.background = '';
+            btn.disabled = false;
+          }, 3500);
+        }
+      } catch {
+        btn.innerHTML = 'Try Again <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        btn.style.background = 'linear-gradient(135deg,#FF6B4A 0%,#c0392b 100%)';
+        setTimeout(() => {
+          btn.innerHTML = 'Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          btn.style.background = '';
+          btn.disabled = false;
+        }, 3500);
+      }
     }
 
     // ===================== i18n =====================
