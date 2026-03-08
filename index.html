@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-SAT | Automation & Advertising Agency</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal:     '#00E5BE',
+              purple:   '#7B5CF0',
+              coral:    '#FF6B4A',
+              bg:       '#07090F',
+              card:     '#0D1322',
+              elevated: '#131C30',
+              surface:  '#1A2540',
+              border:   '#1E2D48',
+              muted:    '#5C6B8A',
+              text:     '#8FA0BF',
+              light:    '#E2EAF8',
+            }
+          },
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body:    ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: transparent;
+      color: #8FA0BF;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    /* Canvas shader fallback – keeps the page dark if WebGL is unavailable */
+    #shader-bg { background: #07090F; }
+
+    /* Grain texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+
+    /* --- Backgrounds & Glows --- */
+    .bg-hero {
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 25%, rgba(0, 229, 190, 0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 45% at 85% 75%, rgba(123, 92, 240, 0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255, 107, 74, 0.03) 0%, transparent 60%),
+        rgba(7, 9, 15, 0.92);
+    }
+
+    .glow-blob-teal {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(0, 229, 190, 0.06);
+      filter: blur(90px);
+      pointer-events: none;
+    }
+    .glow-blob-purple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(123, 92, 240, 0.06);
+      filter: blur(90px);
+      pointer-events: none;
+    }
+
+    /* Grid bg */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(0,229,190,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,190,0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+    }
+
+    /* --- Gradients on text --- */
+    .text-gradient-teal {
+      background: linear-gradient(135deg, #00E5BE 0%, #00C4FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-purple {
+      background: linear-gradient(135deg, #7B5CF0 0%, #C45CF0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* --- Shadows --- */
+    .shadow-teal {
+      box-shadow:
+        0 0 0 1px rgba(0, 229, 190, 0.12),
+        0 4px 20px rgba(0, 229, 190, 0.06),
+        0 20px 48px rgba(0, 0, 0, 0.45);
+    }
+    .shadow-purple {
+      box-shadow:
+        0 0 0 1px rgba(123, 92, 240, 0.12),
+        0 4px 20px rgba(123, 92, 240, 0.06),
+        0 20px 48px rgba(0, 0, 0, 0.45);
+    }
+    .shadow-card {
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        0 10px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Glass --- */
+    .glass-nav {
+      background: rgba(7, 9, 15, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .glass-card {
+      background: rgba(13, 19, 34, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    /* --- Buttons --- */
+    .btn-primary {
+      background: linear-gradient(135deg, #00E5BE 0%, #00C4FF 100%);
+      color: #07090F;
+      font-weight: 600;
+      padding: 0.75rem 1.75rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+      box-shadow: 0 4px 20px rgba(0, 229, 190, 0.25);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 32px rgba(0, 229, 190, 0.38);
+    }
+    .btn-primary:active { transform: translateY(0) scale(0.98); }
+    .btn-primary:focus-visible { outline: 2px solid #00E5BE; outline-offset: 3px; }
+
+    .btn-outline {
+      border: 1px solid rgba(0, 229, 190, 0.3);
+      color: #00E5BE;
+      padding: 0.75rem 1.75rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+    }
+    .btn-outline:hover {
+      background: rgba(0, 229, 190, 0.08);
+      border-color: rgba(0, 229, 190, 0.55);
+      transform: translateY(-2px);
+    }
+    .btn-outline:active { transform: translateY(0); }
+    .btn-outline:focus-visible { outline: 2px solid #00E5BE; outline-offset: 3px; }
+
+    .btn-purple {
+      border: 1px solid rgba(123, 92, 240, 0.3);
+      color: #7B5CF0;
+      padding: 0.75rem 1.75rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+    }
+    .btn-purple:hover {
+      background: rgba(123, 92, 240, 0.08);
+      border-color: rgba(123, 92, 240, 0.55);
+      transform: translateY(-2px);
+    }
+    .btn-purple:active { transform: translateY(0); }
+    .btn-purple:focus-visible { outline: 2px solid #7B5CF0; outline-offset: 3px; }
+
+    /* --- Nav links --- */
+    .nav-link {
+      position: relative;
+      color: #8FA0BF;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #00E5BE;
+      transition: width 0.2s ease;
+    }
+    .nav-link:hover { color: #E2EAF8; }
+    .nav-link:hover::after { width: 100%; }
+    .nav-link:focus-visible { outline: 2px solid #00E5BE; outline-offset: 4px; border-radius: 2px; }
+
+    /* --- Section label --- */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #00E5BE;
+    }
+
+    /* --- Tags --- */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tag-teal   { background: rgba(0,229,190,0.1);   color: #00E5BE; border: 1px solid rgba(0,229,190,0.2);   }
+    .tag-purple { background: rgba(123,92,240,0.1);  color: #7B5CF0; border: 1px solid rgba(123,92,240,0.2);  }
+    .tag-coral  { background: rgba(255,107,74,0.1);  color: #FF6B4A; border: 1px solid rgba(255,107,74,0.2);  }
+
+    /* --- Icon boxes --- */
+    .icon-box {
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-box-teal   { background: rgba(0,229,190,0.1);  border: 1px solid rgba(0,229,190,0.15);  }
+    .icon-box-purple { background: rgba(123,92,240,0.1); border: 1px solid rgba(123,92,240,0.15); }
+    .icon-box-coral  { background: rgba(255,107,74,0.1); border: 1px solid rgba(255,107,74,0.15); }
+
+    /* --- Divider --- */
+    .divider-glow {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(0,229,190,0.18) 30%, rgba(123,92,240,0.18) 70%, transparent 100%);
+    }
+
+    /* --- Service cards --- */
+    .service-card {
+      transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.26s ease;
+    }
+    .service-card:hover { transform: translateY(-6px); }
+
+    /* --- Work cards --- */
+    .work-card { transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .work-card:hover { transform: translateY(-5px) scale(1.01); }
+    .work-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(7,9,15,0.9) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.28s ease;
+    }
+    .work-card:hover .work-card-overlay { opacity: 1; }
+    .work-card-label {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1.25rem;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .work-card:hover .work-card-label { transform: translateY(0); }
+
+    /* --- Testimonial cards --- */
+    .testimonial-card { transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .testimonial-card:hover { transform: translateY(-5px); }
+
+    /* --- Marquee --- */
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 22s linear infinite;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+
+    /* --- Form inputs --- */
+    .form-input {
+      background: rgba(13, 19, 34, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #E2EAF8;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9375rem;
+    }
+    .form-input:focus {
+      border-color: rgba(0, 229, 190, 0.4);
+      box-shadow: 0 0 0 3px rgba(0, 229, 190, 0.08);
+    }
+    .form-input::placeholder { color: #5C6B8A; }
+
+    /* --- Stat items --- */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-item { animation: fade-up 0.6s ease both; }
+
+    /* --- Scrollbar --- */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #07090F; }
+    ::-webkit-scrollbar-thumb { background: #1A2540; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,229,190,0.5); }
+
+    /* --- Mobile menu --- */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+
+    /* --- Language switcher --- */
+    .lang-switcher { position: relative; }
+    .lang-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 11px; border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #8FA0BF; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s ease; font-family: 'Inter', sans-serif;
+    }
+    .lang-btn:hover { background: rgba(0,229,190,0.08); border-color: rgba(0,229,190,0.25); color: #E2EAF8; }
+    .lang-btn:focus-visible { outline: 2px solid #00E5BE; outline-offset: 3px; }
+    .lang-chevron { transition: transform 0.2s ease; }
+    .lang-btn.open .lang-chevron { transform: rotate(180deg); }
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: #0D1322; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 5px; min-width: 155px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,229,190,0.05);
+      display: none; z-index: 200;
+    }
+    .lang-dropdown.open { display: block; }
+    .lang-option {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 11px; border-radius: 7px; cursor: pointer;
+      transition: background 0.15s; font-size: 0.8rem;
+      color: #8FA0BF; border: none; background: none; width: 100%; text-align: left;
+      font-family: 'Inter', sans-serif;
+    }
+    .lang-option:hover { background: rgba(255,255,255,0.05); color: #E2EAF8; }
+    .lang-option.active { color: #00E5BE; background: rgba(0,229,190,0.06); }
+    .lang-flag { font-size: 1rem; line-height: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- ===================== NAVIGATION ===================== -->
+  <nav class="glass-nav fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center justify-between py-4">
+
+        <!-- Logo -->
+        <a href="#" aria-label="K-SAT Home" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-decoration:none;">
+          <img src="brand_assets/logo-K-Sat.png" alt="K-SAT" style="height:72px;width:auto;filter:invert(1);opacity:0.92;">
+          <span style="font-size:0.58rem;letter-spacing:0.14em;color:#5C6B8A;text-transform:uppercase;font-family:'Inter',sans-serif;line-height:1;padding-left:2px;">Automation &amp; Advertising Agency</span>
+        </a>
+
+        <!-- Desktop links -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#services" class="nav-link" data-i18n="nav.services">Services</a>
+          <a href="#work"     class="nav-link" data-i18n="nav.work">Work</a>
+          <a href="#about"    class="nav-link" data-i18n="nav.about">About</a>
+          <a href="#process"  class="nav-link" data-i18n="nav.process">Process</a>
+          <a href="#contact"  class="nav-link" data-i18n="nav.contact">Contact</a>
+        </div>
+
+        <!-- Language switcher + CTA -->
+        <div class="hidden md:flex items-center gap-3">
+          <div class="lang-switcher">
+            <button class="lang-btn" id="lang-toggle" aria-label="Switch language">
+              <span class="lang-flag" id="lang-flag">🇬🇧</span>
+              <span id="lang-code">EN</span>
+              <svg class="lang-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="lang-dropdown" id="lang-dropdown">
+              <button class="lang-option active" data-lang="en"><span class="lang-flag">🇬🇧</span> English</button>
+              <button class="lang-option" data-lang="tr"><span class="lang-flag">🇹🇷</span> Türkçe</button>
+              <button class="lang-option" data-lang="fr"><span class="lang-flag">🇫🇷</span> Français</button>
+              <button class="lang-option" data-lang="nl"><span class="lang-flag">🇳🇱</span> Nederlands</button>
+            </div>
+          </div>
+          <a href="#contact" class="btn-primary text-sm" data-i18n="nav.cta">
+            Get Started
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5H11M11 6.5L7 2.5M11 6.5L7 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <!-- Mobile toggle -->
+        <button id="menu-toggle" aria-label="Toggle menu"
+          class="md:hidden p-2 rounded-lg text-brand-text hover:text-brand-light hover:bg-white/5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">
+          <svg id="icon-open"  width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6H19M3 11H19M3 16H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <svg id="icon-close" width="22" height="22" viewBox="0 0 22 22" fill="none" style="display:none;"><path d="M5 5L17 17M17 5L5 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="flex-col md:hidden px-6 pb-6 gap-0 border-t border-white/5">
+      <a href="#services" class="mobile-link block py-3.5 text-sm border-b border-white/5 text-brand-text hover:text-brand-light transition-colors" data-i18n="nav.services">Services</a>
+      <a href="#work"     class="mobile-link block py-3.5 text-sm border-b border-white/5 text-brand-text hover:text-brand-light transition-colors" data-i18n="nav.work">Work</a>
+      <a href="#about"    class="mobile-link block py-3.5 text-sm border-b border-white/5 text-brand-text hover:text-brand-light transition-colors" data-i18n="nav.about">About</a>
+      <a href="#process"  class="mobile-link block py-3.5 text-sm border-b border-white/5 text-brand-text hover:text-brand-light transition-colors" data-i18n="nav.process">Process</a>
+      <a href="#contact"  class="mobile-link block py-3.5 text-sm text-brand-text hover:text-brand-light transition-colors" data-i18n="nav.contact">Contact</a>
+      <!-- Mobile lang switcher -->
+      <div class="flex gap-2 mt-3 mb-1">
+        <button class="lang-option" data-lang="en" style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:0.8rem;">🇬🇧 EN</button>
+        <button class="lang-option" data-lang="tr" style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:0.8rem;">🇹🇷 TR</button>
+        <button class="lang-option" data-lang="fr" style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:0.8rem;">🇫🇷 FR</button>
+        <button class="lang-option" data-lang="nl" style="padding:6px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:0.8rem;">🇳🇱 NL</button>
+      </div>
+      <a href="#contact" class="btn-primary mt-2 w-full justify-center text-sm" data-i18n="nav.cta">Get Started</a>
+    </div>
+  </nav>
+
+
+  <!-- ===================== HERO ===================== -->
+  <section class="bg-hero grid-bg relative min-h-screen flex items-center pt-24 overflow-hidden">
+    <div class="glow-blob-teal"   style="width:700px;height:700px;top:-150px;left:-200px;"></div>
+    <div class="glow-blob-purple" style="width:600px;height:600px;bottom:-200px;right:-150px;"></div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24 relative z-10 w-full">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Left: copy -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-8">
+            <span class="tag tag-teal" data-i18n="nav.badge">Automation & Advertising Agency</span>
+            <div class="flex items-center gap-2">
+              <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,0.7);display:inline-block;"></span>
+              <span style="font-size:0.75rem;color:#5C6B8A;" data-i18n="nav.available">Available for New Projects</span>
+            </div>
+          </div>
+
+          <h1 style="font-weight:600;font-size:clamp(2.6rem,5.5vw,4.25rem);line-height:1.04;letter-spacing:-0.02em;color:#E2EAF8;">
+            <span data-i18n="hero.line1">We Automate.</span><br>
+            <span class="text-gradient-teal" data-i18n="hero.line2">We Amplify.</span><br>
+            <span class="text-gradient-purple" data-i18n="hero.line3">You Dominate.</span>
+          </h1>
+
+          <p style="margin-top:1.5rem;font-size:1.0625rem;line-height:1.75;color:#8FA0BF;max-width:500px;" data-i18n="hero.desc">
+            K-SAT is a full-service agency that eliminates operational bottlenecks with intelligent automation and drives measurable growth through data-driven advertising campaigns.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 mt-10">
+            <a href="#contact" class="btn-primary" data-i18n="hero.cta1">
+              Start Your Project
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="#work" class="btn-outline" data-i18n="hero.cta2">
+              View Our Work
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v10M7 11L3 7M7 11L11 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          <!-- Trust bar -->
+          <div class="flex flex-wrap items-center gap-6 mt-12">
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.625rem;font-weight:800;color:#E2EAF8;line-height:1;">150+</div>
+              <div style="font-size:0.7rem;color:#5C6B8A;margin-top:2px;letter-spacing:0.04em;text-transform:uppercase;" data-i18n="hero.stat1">Projects</div>
+            </div>
+            <div style="width:1px;height:36px;background:rgba(255,255,255,0.1);"></div>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.625rem;font-weight:800;color:#E2EAF8;line-height:1;">98%</div>
+              <div style="font-size:0.7rem;color:#5C6B8A;margin-top:2px;letter-spacing:0.04em;text-transform:uppercase;" data-i18n="hero.stat2">Retention</div>
+            </div>
+            <div style="width:1px;height:36px;background:rgba(255,255,255,0.1);"></div>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:1.625rem;font-weight:800;color:#E2EAF8;line-height:1;">3.8x</div>
+              <div style="font-size:0.7rem;color:#5C6B8A;margin-top:2px;letter-spacing:0.04em;text-transform:uppercase;" data-i18n="hero.stat3">Avg. ROAS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: dashboard visual -->
+        <div class="hidden lg:block relative">
+          <!-- Main card -->
+          <div class="glass-card rounded-2xl p-6 shadow-teal relative z-10 ml-auto" style="max-width:390px;">
+            <div class="flex items-center justify-between mb-5">
+              <span style="font-family:'Syne',sans-serif;font-size:0.875rem;font-weight:700;color:#E2EAF8;">Campaign Dashboard</span>
+              <span class="tag tag-teal" style="font-size:0.65rem;">● Live</span>
+            </div>
+
+            <!-- Metric cards -->
+            <div class="grid grid-cols-2 gap-3 mb-5">
+              <div style="background:rgba(0,229,190,0.06);border:1px solid rgba(0,229,190,0.12);border-radius:10px;padding:14px;">
+                <div style="font-size:0.7rem;color:#5C6B8A;margin-bottom:4px;">Impressions</div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.375rem;font-weight:800;color:#00E5BE;">2.4M</div>
+                <div style="font-size:0.7rem;color:#00E5BE;margin-top:3px;">+18.2% ↑</div>
+              </div>
+              <div style="background:rgba(123,92,240,0.06);border:1px solid rgba(123,92,240,0.12);border-radius:10px;padding:14px;">
+                <div style="font-size:0.7rem;color:#5C6B8A;margin-bottom:4px;">Conversions</div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.375rem;font-weight:800;color:#7B5CF0;">8,472</div>
+                <div style="font-size:0.7rem;color:#7B5CF0;margin-top:3px;">+24.7% ↑</div>
+              </div>
+            </div>
+
+            <!-- Mini bar chart -->
+            <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:14px;margin-bottom:14px;">
+              <div style="font-size:0.7rem;color:#5C6B8A;margin-bottom:10px;">Revenue Growth (7 days)</div>
+              <div style="display:flex;align-items:flex-end;gap:5px;height:52px;">
+                <div style="flex:1;background:rgba(0,229,190,0.18);border-radius:3px;height:38%;"></div>
+                <div style="flex:1;background:rgba(0,229,190,0.28);border-radius:3px;height:52%;"></div>
+                <div style="flex:1;background:rgba(0,229,190,0.38);border-radius:3px;height:44%;"></div>
+                <div style="flex:1;background:rgba(0,229,190,0.5);border-radius:3px;height:68%;"></div>
+                <div style="flex:1;background:rgba(0,229,190,0.62);border-radius:3px;height:62%;"></div>
+                <div style="flex:1;background:rgba(0,229,190,0.78);border-radius:3px;height:82%;"></div>
+                <div style="flex:1;background:#00E5BE;border-radius:3px;height:100%;"></div>
+              </div>
+            </div>
+
+            <!-- Automation pipeline -->
+            <div style="font-size:0.7rem;color:#5C6B8A;margin-bottom:8px;letter-spacing:0.04em;text-transform:uppercase;">Automation Pipeline</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.08);border-radius:8px;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#00E5BE;box-shadow:0 0 8px rgba(0,229,190,0.7);flex-shrink:0;"></div>
+                <span style="font-size:0.75rem;color:#8FA0BF;flex:1;">Lead Capture → CRM Sync</span>
+                <span style="font-size:0.7rem;color:#00E5BE;font-weight:600;">Active</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(123,92,240,0.04);border:1px solid rgba(123,92,240,0.08);border-radius:8px;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#7B5CF0;box-shadow:0 0 8px rgba(123,92,240,0.7);flex-shrink:0;"></div>
+                <span style="font-size:0.75rem;color:#8FA0BF;flex:1;">Email → Segment → Send</span>
+                <span style="font-size:0.7rem;color:#7B5CF0;font-weight:600;">Running</span>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Floating notification: ROAS -->
+          <div class="glass-card rounded-xl px-4 py-3 shadow-teal absolute z-20" style="border:1px solid rgba(0,229,190,0.2);right:10px;bottom:48px;">
+            <div class="flex items-center gap-3">
+              <div class="icon-box icon-box-teal" style="width:34px;height:34px;font-size:1rem;">📈</div>
+              <div>
+                <div style="font-size:0.8rem;font-weight:600;color:#E2EAF8;">ROAS: 4.2x</div>
+                <div style="font-size:0.65rem;color:#00E5BE;">+42% this week</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Decorative rings -->
+          <div style="position:absolute;inset:-50px;border-radius:50%;border:1px solid rgba(0,229,190,0.04);pointer-events:none;z-index:1;"></div>
+          <div style="position:absolute;inset:-100px;border-radius:50%;border:1px solid rgba(123,92,240,0.03);pointer-events:none;z-index:1;"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== MARQUEE: TECH STACK ===================== -->
+  <section style="padding:3.5rem 0;background:#07090F;overflow:hidden;">
+    <div class="max-w-7xl mx-auto px-6 mb-5">
+      <p style="text-align:center;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:#5C6B8A;">Trusted Platforms & Technologies</p>
+    </div>
+    <div style="overflow:hidden;">
+      <div class="marquee-track">
+        <div style="display:flex;align-items:center;gap:56px;padding:0 28px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Google Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Meta Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">HubSpot</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Zapier</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Make.com</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Salesforce</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">TikTok Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">LinkedIn Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">n8n</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">OpenAI</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Airtable</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Notion</span>
+        </div>
+        <!-- Duplicate for seamless loop -->
+        <div style="display:flex;align-items:center;gap:56px;padding:0 28px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Google Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Meta Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">HubSpot</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Zapier</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Make.com</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Salesforce</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">TikTok Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">LinkedIn Ads</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">n8n</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">OpenAI</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Airtable</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:rgba(142,160,191,0.35);white-space:nowrap;">Notion</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== SERVICES ===================== -->
+  <section id="services" style="padding:7rem 0;background:#07090F;position:relative;overflow:hidden;">
+    <div class="glow-blob-teal"   style="width:550px;height:550px;top:-50px;left:-200px;opacity:0.55;"></div>
+    <div class="glow-blob-purple" style="width:450px;height:450px;bottom:-100px;right:-150px;opacity:0.55;"></div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:4rem;">
+        <p class="section-label" style="margin-bottom:1rem;" data-i18n="svc.label">What We Do</p>
+        <h2 style="font-weight:600;font-size:clamp(2rem,4.5vw,3.25rem);letter-spacing:-0.02em;color:#E2EAF8;line-height:1.08;">
+          <span data-i18n="svc.title1">Two Engines.</span><br><span data-i18n="svc.title2">One Agency.</span>
+        </h2>
+        <p style="margin-top:1rem;font-size:1.0625rem;line-height:1.75;color:#8FA0BF;max-width:540px;margin-left:auto;margin-right:auto;" data-i18n="svc.desc">
+          We combine intelligent automation with performance advertising — creating compounding growth for ambitious businesses.
+        </p>
+      </div>
+
+      <!-- Two main cards -->
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+
+        <!-- AUTOMATION card -->
+        <div class="glass-card rounded-2xl p-8 shadow-teal service-card" style="border:1px solid rgba(0,229,190,0.1);">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
+            <div class="icon-box icon-box-teal" style="width:58px;height:58px;font-size:1.6rem;">⚡</div>
+            <div>
+              <span class="tag tag-teal" data-i18n="auto.tag">Automation</span>
+              <h3 style="font-weight:600;font-size:1.4rem;color:#E2EAF8;margin-top:6px;letter-spacing:-0.02em;" data-i18n="auto.title">Business Automation</h3>
+            </div>
+          </div>
+
+          <p style="font-size:0.9375rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.75rem;" data-i18n="auto.desc">
+            We identify repetitive bottlenecks in your operations and replace them with intelligent automated workflows — saving time, reducing errors, and scaling without extra headcount.
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-teal" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">🔄</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="auto.i1t">Workflow Automation</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="auto.i1d">Zapier, Make.com, n8n — connect your entire tech stack seamlessly</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-teal" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">🤖</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="auto.i2t">AI Integration</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="auto.i2d">GPT-powered assistants, smart chatbots & AI content pipelines</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-teal" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">📊</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="auto.i3t">CRM & Lead Automation</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="auto.i3d">Auto-qualify, nurture, and close leads — completely on autopilot</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-teal" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">🕷️</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="auto.i4t">Data Scraping & Enrichment</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="auto.i4d">Structured data collection for competitive & market intelligence</div>
+              </div>
+            </div>
+          </div>
+
+          <a href="#contact" class="btn-outline" style="width:100%;justify-content:center;" data-i18n="auto.cta">Automate My Business</a>
+        </div>
+
+        <!-- ADVERTISING card -->
+        <div class="glass-card rounded-2xl p-8 shadow-purple service-card" style="border:1px solid rgba(123,92,240,0.1);">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
+            <div class="icon-box icon-box-purple" style="width:58px;height:58px;font-size:1.6rem;">📡</div>
+            <div>
+              <span class="tag tag-purple" data-i18n="ads.tag">Advertising</span>
+              <h3 style="font-weight:600;font-size:1.4rem;color:#E2EAF8;margin-top:6px;letter-spacing:-0.02em;" data-i18n="ads.title">Performance Advertising</h3>
+            </div>
+          </div>
+
+          <p style="font-size:0.9375rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.75rem;" data-i18n="ads.desc">
+            Data-driven ad campaigns that turn your marketing budget into measurable revenue. We manage the full funnel — from awareness to conversion — and optimize every touchpoint.
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(123,92,240,0.04);border:1px solid rgba(123,92,240,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-purple" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">🎯</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="ads.i1t">Paid Social & Search</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="ads.i1d">Meta, Google, TikTok, LinkedIn — all platforms managed for ROI</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(123,92,240,0.04);border:1px solid rgba(123,92,240,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-purple" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">✍️</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="ads.i2t">Creative Strategy & Copy</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="ads.i2d">Ad creatives and copy that stop the scroll and drive conversions</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(123,92,240,0.04);border:1px solid rgba(123,92,240,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-purple" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">🔍</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="ads.i3t">SEO & Content Marketing</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="ads.i3d">Organic growth through strategic search and content programs</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(123,92,240,0.04);border:1px solid rgba(123,92,240,0.08);border-radius:10px;">
+              <div class="icon-box icon-box-purple" style="width:38px;height:38px;font-size:1rem;flex-shrink:0;">📐</div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="ads.i4t">Brand Identity & Design</div>
+                <div style="font-size:0.8rem;color:#8FA0BF;line-height:1.5;" data-i18n="ads.i4d">Logo, visual identity, and full brand positioning strategy</div>
+              </div>
+            </div>
+          </div>
+
+          <a href="#contact" class="btn-purple" style="width:100%;justify-content:center;" data-i18n="ads.cta">Boost My Advertising</a>
+        </div>
+
+      </div>
+
+      <!-- Tag cloud -->
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">
+        <span class="tag tag-teal">E-commerce Automation</span>
+        <span class="tag tag-purple">Influencer Marketing</span>
+        <span class="tag tag-teal">API Integrations</span>
+        <span class="tag tag-coral">Email Marketing</span>
+        <span class="tag tag-purple">Funnel Building</span>
+        <span class="tag tag-teal">Reporting Dashboards</span>
+        <span class="tag tag-coral">Retargeting Campaigns</span>
+        <span class="tag tag-teal">Chatbot Development</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== STATS ===================== -->
+  <section id="about" style="padding:6rem 0;background:linear-gradient(180deg,#07090F 0%,#0A0F1C 50%,#07090F 100%);">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="stat-item">
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(2.25rem,4vw,3.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1;" class="text-gradient-teal">150+</div>
+          <div style="font-size:0.7rem;color:#5C6B8A;margin-top:8px;letter-spacing:0.08em;text-transform:uppercase;" data-i18n="stats.s1">Projects Completed</div>
+        </div>
+        <div class="stat-item" style="animation-delay:0.1s;">
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(2.25rem,4vw,3.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1;" class="text-gradient-teal">$4.2M+</div>
+          <div style="font-size:0.7rem;color:#5C6B8A;margin-top:8px;letter-spacing:0.08em;text-transform:uppercase;" data-i18n="stats.s2">Ad Spend Managed</div>
+        </div>
+        <div class="stat-item" style="animation-delay:0.2s;">
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(2.25rem,4vw,3.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1;" class="text-gradient-purple">98%</div>
+          <div style="font-size:0.7rem;color:#5C6B8A;margin-top:8px;letter-spacing:0.08em;text-transform:uppercase;" data-i18n="stats.s3">Client Retention</div>
+        </div>
+        <div class="stat-item" style="animation-delay:0.3s;">
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(2.25rem,4vw,3.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1;" class="text-gradient-purple">3.8x</div>
+          <div style="font-size:0.7rem;color:#5C6B8A;margin-top:8px;letter-spacing:0.08em;text-transform:uppercase;" data-i18n="stats.s4">Average ROAS</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== WORK ===================== -->
+  <section id="work" style="padding:7rem 0;background:#07090F;position:relative;overflow:hidden;">
+    <div class="glow-blob-purple" style="width:500px;height:500px;top:0;right:-150px;opacity:0.4;"></div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <div style="display:flex;flex-direction:column;gap:1.5rem;margin-bottom:3.5rem;" class="md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="section-label" style="margin-bottom:1rem;" data-i18n="work.label">Selected Work</p>
+          <h2 style="font-weight:600;font-size:clamp(2rem,4.5vw,3.25rem);letter-spacing:-0.02em;color:#E2EAF8;line-height:1.08;">
+            <span data-i18n="work.title1">Results We're</span><br><span data-i18n="work.title2">Proud Of</span>
+          </h2>
+        </div>
+        <a href="#contact" class="btn-outline" style="align-self:flex-start;" data-i18n="work.all">View All Projects</a>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="work-card glass-card rounded-2xl overflow-hidden shadow-card" style="border:1px solid rgba(255,255,255,0.06);">
+          <div style="position:relative;">
+            <img src="https://placehold.co/600x340/0D1322/00E5BE?text=E-commerce+Automation" alt="E-commerce Automation" style="width:100%;height:200px;object-fit:cover;display:block;">
+            <div class="work-card-overlay"></div>
+            <div class="work-card-label">
+              <span class="tag tag-teal">Automation</span>
+              <p style="font-size:0.8rem;color:#8FA0BF;margin-top:4px;" data-i18n="work.c1o">Reduced manual processing by 94%</p>
+            </div>
+          </div>
+          <div style="padding:1.25rem 1.5rem;">
+            <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;letter-spacing:-0.01em;margin-bottom:6px;" data-i18n="work.c1t">E-commerce Order Automation</h3>
+            <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.6;" data-i18n="work.c1d">Full order-to-fulfillment pipeline automation for a 7-figure Shopify store. Zero manual intervention.</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-size:0.7rem;color:#5C6B8A;" data-i18n="work.c1m">Retail · Automation</span>
+              <span style="font-family:'Syne',sans-serif;font-size:0.8125rem;font-weight:700;color:#00E5BE;" data-i18n="work.c1r">94% Time Saved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="work-card glass-card rounded-2xl overflow-hidden shadow-card" style="border:1px solid rgba(255,255,255,0.06);">
+          <div style="position:relative;">
+            <img src="https://placehold.co/600x340/0D1322/7B5CF0?text=Meta+Ad+Campaign" alt="Meta Ad Campaign" style="width:100%;height:200px;object-fit:cover;display:block;">
+            <div class="work-card-overlay"></div>
+            <div class="work-card-label">
+              <span class="tag tag-purple">Advertising</span>
+              <p style="font-size:0.8rem;color:#8FA0BF;margin-top:4px;" data-i18n="work.c2o">5.2x ROAS achieved in 60 days</p>
+            </div>
+          </div>
+          <div style="padding:1.25rem 1.5rem;">
+            <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;letter-spacing:-0.01em;margin-bottom:6px;" data-i18n="work.c2t">SaaS Meta Ad Scale-Up</h3>
+            <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.6;" data-i18n="work.c2d">Restructured entire Meta funnel for a B2B SaaS — growing ROAS from 1.8x to 5.2x in under 60 days.</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-size:0.7rem;color:#5C6B8A;" data-i18n="work.c2m">SaaS · Paid Social</span>
+              <span style="font-family:'Syne',sans-serif;font-size:0.8125rem;font-weight:700;color:#7B5CF0;" data-i18n="work.c2r">5.2x ROAS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="work-card glass-card rounded-2xl overflow-hidden shadow-card" style="border:1px solid rgba(255,255,255,0.06);">
+          <div style="position:relative;">
+            <img src="https://placehold.co/600x340/0D1322/FF6B4A?text=AI+Lead+Engine" alt="AI Lead Engine" style="width:100%;height:200px;object-fit:cover;display:block;">
+            <div class="work-card-overlay"></div>
+            <div class="work-card-label">
+              <span class="tag tag-coral">AI + Automation</span>
+              <p style="font-size:0.8rem;color:#8FA0BF;margin-top:4px;" data-i18n="work.c3o">300 qualified leads/day on autopilot</p>
+            </div>
+          </div>
+          <div style="padding:1.25rem 1.5rem;">
+            <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;letter-spacing:-0.01em;margin-bottom:6px;" data-i18n="work.c3t">AI-Powered Lead Engine</h3>
+            <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.6;" data-i18n="work.c3d">Built an AI lead qualification and outreach system delivering 300+ qualified leads daily with zero manual effort.</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+              <span style="font-size:0.7rem;color:#5C6B8A;" data-i18n="work.c3m">B2B · AI Automation</span>
+              <span style="font-family:'Syne',sans-serif;font-size:0.8125rem;font-weight:700;color:#FF6B4A;" data-i18n="work.c3r">300+ Leads/Day</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== PROCESS ===================== -->
+  <section id="process" style="padding:7rem 0;background:linear-gradient(180deg,#07090F 0%,#0A0F1C 100%);">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div style="text-align:center;margin-bottom:4rem;">
+        <p class="section-label" style="margin-bottom:1rem;" data-i18n="proc.label">How We Work</p>
+        <h2 style="font-weight:600;font-size:clamp(2rem,4.5vw,3.25rem);letter-spacing:-0.02em;color:#E2EAF8;line-height:1.08;">
+          <span data-i18n="proc.title1">From Discovery</span><br><span data-i18n="proc.title2">to Domination</span>
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-8 relative">
+        <!-- Connecting line -->
+        <div class="hidden md:block" style="position:absolute;top:27px;left:14%;right:14%;height:1px;background:linear-gradient(90deg,rgba(0,229,190,0.25),rgba(123,92,240,0.25));z-index:0;"></div>
+
+        <div style="text-align:center;position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:rgba(0,229,190,0.1);border:1px solid rgba(0,229,190,0.3);box-shadow:0 0 24px rgba(0,229,190,0.1);">
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.0625rem;color:#00E5BE;">01</span>
+          </div>
+          <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;margin-bottom:8px;letter-spacing:-0.01em;" data-i18n="proc.s1t">Discovery</h3>
+          <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.65;" data-i18n="proc.s1d">Deep dive into your business, goals, bottlenecks, and opportunities. No assumptions, just clarity.</p>
+        </div>
+
+        <div style="text-align:center;position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:rgba(0,229,190,0.1);border:1px solid rgba(0,229,190,0.3);box-shadow:0 0 24px rgba(0,229,190,0.1);">
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.0625rem;color:#00E5BE;">02</span>
+          </div>
+          <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;margin-bottom:8px;letter-spacing:-0.01em;" data-i18n="proc.s2t">Strategy</h3>
+          <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.65;" data-i18n="proc.s2d">Custom roadmap with clear deliverables, KPIs, and timelines. You review and approve everything.</p>
+        </div>
+
+        <div style="text-align:center;position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:rgba(123,92,240,0.1);border:1px solid rgba(123,92,240,0.3);box-shadow:0 0 24px rgba(123,92,240,0.1);">
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.0625rem;color:#7B5CF0;">03</span>
+          </div>
+          <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;margin-bottom:8px;letter-spacing:-0.01em;" data-i18n="proc.s3t">Build & Launch</h3>
+          <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.65;" data-i18n="proc.s3d">Fast build, rigorous testing, smooth launch. Weekly updates and transparent communication throughout.</p>
+        </div>
+
+        <div style="text-align:center;position:relative;z-index:1;">
+          <div style="width:54px;height:54px;border-radius:50%;margin:0 auto 1.25rem;display:flex;align-items:center;justify-content:center;background:rgba(123,92,240,0.1);border:1px solid rgba(123,92,240,0.3);box-shadow:0 0 24px rgba(123,92,240,0.1);">
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.0625rem;color:#7B5CF0;">04</span>
+          </div>
+          <h3 style="font-weight:700;font-size:1.0625rem;color:#E2EAF8;margin-bottom:8px;letter-spacing:-0.01em;" data-i18n="proc.s4t">Optimize & Scale</h3>
+          <p style="font-size:0.8125rem;color:#8FA0BF;line-height:1.65;" data-i18n="proc.s4d">Continuous monitoring, A/B testing, and scaling what works. We never stop pushing performance forward.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== TESTIMONIALS ===================== -->
+  <section style="padding:7rem 0;background:#07090F;position:relative;overflow:hidden;">
+    <div class="glow-blob-teal" style="width:450px;height:450px;bottom:-100px;left:-100px;opacity:0.4;"></div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+      <div style="text-align:center;margin-bottom:4rem;">
+        <p class="section-label" style="margin-bottom:1rem;" data-i18n="testi.label">Client Stories</p>
+        <h2 style="font-weight:600;font-size:clamp(2rem,4.5vw,3.25rem);letter-spacing:-0.02em;color:#E2EAF8;line-height:1.08;" data-i18n="testi.title">
+          What Our Clients Say
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="glass-card rounded-2xl p-6 shadow-card testimonial-card" style="border:1px solid rgba(0,229,190,0.08);">
+          <div style="color:#00E5BE;font-size:1rem;margin-bottom:1.25rem;">★★★★★</div>
+          <blockquote style="font-size:0.9375rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.5rem;font-style:italic;" data-i18n="testi.q1">
+            "K-SAT automated our entire client onboarding flow. What used to take our team 3 hours per client now happens in 5 minutes. Incredible ROI."
+          </blockquote>
+          <div style="display:flex;align-items:center;gap:12px;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+            <img src="https://placehold.co/44x44/1A2540/00E5BE?text=AK" alt="Ahmet K." style="width:44px;height:44px;border-radius:50%;">
+            <div>
+              <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;">Ahmet K.</div>
+              <div style="font-size:0.75rem;color:#5C6B8A;" data-i18n="testi.r1">CEO, TechFlow Ltd.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 shadow-card testimonial-card" style="border:1px solid rgba(123,92,240,0.08);">
+          <div style="color:#7B5CF0;font-size:1rem;margin-bottom:1.25rem;">★★★★★</div>
+          <blockquote style="font-size:0.9375rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.5rem;font-style:italic;" data-i18n="testi.q2">
+            "Our Meta campaigns were burning cash. K-SAT restructured everything in 2 weeks — we hit 4.8x ROAS within a month. Best decision we made this year."
+          </blockquote>
+          <div style="display:flex;align-items:center;gap:12px;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+            <img src="https://placehold.co/44x44/1A2540/7B5CF0?text=SY" alt="Sara Y." style="width:44px;height:44px;border-radius:50%;">
+            <div>
+              <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;">Sara Y.</div>
+              <div style="font-size:0.75rem;color:#5C6B8A;" data-i18n="testi.r2">CMO, ShopEase</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 shadow-card testimonial-card" style="border:1px solid rgba(255,107,74,0.08);">
+          <div style="color:#FF6B4A;font-size:1rem;margin-bottom:1.25rem;">★★★★★</div>
+          <blockquote style="font-size:0.9375rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.5rem;font-style:italic;" data-i18n="testi.q3">
+            "They built an AI outreach bot that generates 200+ qualified leads per week. Our sales team stopped cold calling and started just closing. Game-changer."
+          </blockquote>
+          <div style="display:flex;align-items:center;gap:12px;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06);">
+            <img src="https://placehold.co/44x44/1A2540/FF6B4A?text=MB" alt="Mehmet B." style="width:44px;height:44px;border-radius:50%;">
+            <div>
+              <div style="font-weight:600;font-size:0.875rem;color:#E2EAF8;">Mehmet B.</div>
+              <div style="font-size:0.75rem;color:#5C6B8A;" data-i18n="testi.r3">Founder, GrowScale Agency</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider-glow"></div>
+
+
+  <!-- ===================== CONTACT ===================== -->
+  <section id="contact" style="padding:7rem 0;background:linear-gradient(180deg,#07090F 0%,#0A0F1C 100%);position:relative;overflow:hidden;">
+    <div class="glow-blob-teal" style="width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.5;"></div>
+
+    <div class="max-w-6xl mx-auto px-6 lg:px-8 relative z-10">
+      <div class="grid lg:grid-cols-2 gap-16 items-start">
+
+        <!-- Left: Copy -->
+        <div>
+          <p class="section-label" style="margin-bottom:1rem;" data-i18n="contact.label">Let's Work Together</p>
+          <h2 style="font-weight:600;font-size:clamp(2rem,4.5vw,3.25rem);letter-spacing:-0.02em;color:#E2EAF8;line-height:1.08;margin-bottom:1.5rem;">
+            <span data-i18n="contact.title1">Ready to Automate</span><br><span data-i18n="contact.title2">&amp; Accelerate?</span>
+          </h2>
+          <p style="font-size:1.0625rem;line-height:1.75;color:#8FA0BF;margin-bottom:2rem;" data-i18n="contact.desc">
+            Book a free 30-minute strategy call. We'll analyze your business, identify quick wins, and propose a custom action plan — completely free, no strings attached.
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:2.5rem;">
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="icon-box icon-box-teal" style="width:40px;height:40px;font-size:1rem;flex-shrink:0;">✓</div>
+              <span style="font-size:0.9375rem;color:#8FA0BF;" data-i18n="contact.c1">Free 30-min strategy consultation</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="icon-box icon-box-teal" style="width:40px;height:40px;font-size:1rem;flex-shrink:0;">✓</div>
+              <span style="font-size:0.9375rem;color:#8FA0BF;" data-i18n="contact.c2">Custom proposal delivered within 48 hours</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <div class="icon-box icon-box-teal" style="width:40px;height:40px;font-size:1rem;flex-shrink:0;">✓</div>
+              <span style="font-size:0.9375rem;color:#8FA0BF;" data-i18n="contact.c3">No lock-in contracts — cancel anytime</span>
+            </div>
+          </div>
+
+          <div style="padding:1.25rem;border-radius:12px;background:rgba(0,229,190,0.04);border:1px solid rgba(0,229,190,0.1);">
+            <p style="font-size:0.8rem;color:#5C6B8A;margin-bottom:6px;" data-i18n="contact.direct">Or reach us directly:</p>
+            <a href="mailto:info@k-sat.be" style="color:#00E5BE;font-weight:600;font-size:0.9375rem;text-decoration:none;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">info@k-sat.be</a>
+          </div>
+        </div>
+
+        <!-- Right: Form -->
+        <div class="glass-card rounded-2xl p-8 shadow-teal" style="border:1px solid rgba(0,229,190,0.1);">
+          <h3 style="font-weight:700;font-size:1.25rem;color:#E2EAF8;margin-bottom:1.5rem;letter-spacing:-0.02em;" data-i18n="contact.form.title">Send Us a Message</h3>
+
+          <form id="contact-form" onsubmit="handleSubmit(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.name">Name</label>
+                <input type="text" data-i18n-ph="contact.name.ph" placeholder="Your name" class="form-input" required>
+              </div>
+              <div>
+                <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.email">Email</label>
+                <input type="email" data-i18n-ph="contact.email.ph" placeholder="your@email.com" class="form-input" required>
+              </div>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;"><span data-i18n="contact.company">Company</span> <span style="color:#5C6B8A;font-weight:400;" data-i18n="contact.optional">(optional)</span></label>
+              <input type="text" data-i18n-ph="contact.company.ph" placeholder="Your company" class="form-input">
+            </div>
+            <div>
+              <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.interest">I'm interested in</label>
+              <select class="form-input" id="service-select" style="appearance:none;cursor:pointer;">
+                <option value="" data-i18n-opt="contact.opt0">Select a service...</option>
+                <option value="automation" data-i18n-opt="contact.opt1">Business Automation</option>
+                <option value="advertising" data-i18n-opt="contact.opt2">Performance Advertising</option>
+                <option value="both" data-i18n-opt="contact.opt3">Both Automation &amp; Advertising</option>
+                <option value="other" data-i18n-opt="contact.opt4">Other</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.8rem;font-weight:500;color:#8FA0BF;margin-bottom:6px;" data-i18n="contact.msg">Message</label>
+              <textarea rows="4" data-i18n-ph="contact.msg.ph" placeholder="Tell us about your project..." class="form-input" style="resize:vertical;" required></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="submit-btn" style="width:100%;justify-content:center;font-size:1rem;" data-i18n="contact.submit">
+              Send Message
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+
+          <p style="margin-top:1rem;text-align:center;font-size:0.75rem;color:#5C6B8A;" data-i18n="contact.response">
+            We typically respond within 4 hours on business days.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer style="background:#07090F;border-top:1px solid rgba(255,255,255,0.05);">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8" style="padding-top:4rem;padding-bottom:4rem;">
+      <div class="grid md:grid-cols-4 gap-10 mb-12">
+
+        <!-- Brand -->
+        <div class="md:col-span-2">
+          <div style="margin-bottom:1rem;">
+            <img src="brand_assets/logo-K-Sat.png" alt="K-SAT" style="height:34px;width:auto;filter:invert(1);opacity:0.8;">
+          </div>
+          <p style="font-size:0.875rem;line-height:1.75;color:#5C6B8A;max-width:280px;margin-bottom:1.5rem;" data-i18n="footer.desc">
+            Automation & Advertising Agency helping ambitious businesses grow faster, smarter, and leaner.
+          </p>
+          <div style="display:flex;gap:10px;">
+            <a href="#" aria-label="LinkedIn"  style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#8FA0BF;font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:700;transition:all 0.2s ease;text-decoration:none;" onmouseover="this.style.background='rgba(0,229,190,0.1)';this.style.color='#00E5BE';this.style.borderColor='rgba(0,229,190,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#8FA0BF';this.style.borderColor='rgba(255,255,255,0.08)'">in</a>
+            <a href="#" aria-label="X/Twitter" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#8FA0BF;font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:700;transition:all 0.2s ease;text-decoration:none;" onmouseover="this.style.background='rgba(0,229,190,0.1)';this.style.color='#00E5BE';this.style.borderColor='rgba(0,229,190,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#8FA0BF';this.style.borderColor='rgba(255,255,255,0.08)'">𝕏</a>
+            <a href="#" aria-label="Instagram"  style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:#8FA0BF;font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:700;transition:all 0.2s ease;text-decoration:none;" onmouseover="this.style.background='rgba(0,229,190,0.1)';this.style.color='#00E5BE';this.style.borderColor='rgba(0,229,190,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#8FA0BF';this.style.borderColor='rgba(255,255,255,0.08)'">IG</a>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div>
+          <h4 style="font-weight:700;font-size:0.875rem;color:#E2EAF8;margin-bottom:1rem;letter-spacing:0.02em;" data-i18n="footer.services">Services</h4>
+          <ul style="display:flex;flex-direction:column;gap:8px;list-style:none;padding:0;margin:0;">
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv1">Workflow Automation</a></li>
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv2">AI Integration</a></li>
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv3">CRM Automation</a></li>
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv4">Paid Advertising</a></li>
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv5">SEO & Content</a></li>
+            <li><a href="#services" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.srv6">Brand Identity</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h4 style="font-weight:700;font-size:0.875rem;color:#E2EAF8;margin-bottom:1rem;letter-spacing:0.02em;" data-i18n="footer.company">Company</h4>
+          <ul style="display:flex;flex-direction:column;gap:8px;list-style:none;padding:0;margin:0;">
+            <li><a href="#about"   style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.cmp1">About K-SAT</a></li>
+            <li><a href="#work"    style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.cmp2">Case Studies</a></li>
+            <li><a href="#process" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.cmp3">Our Process</a></li>
+            <li><a href="#contact" style="font-size:0.8125rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#00E5BE'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.cmp4">Contact</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div style="padding-top:2rem;display:flex;flex-direction:column;gap:1rem;border-top:1px solid rgba(255,255,255,0.05);" class="sm:flex-row sm:items-center sm:justify-between">
+        <p style="font-size:0.75rem;color:#5C6B8A;" data-i18n="footer.copy">© 2026 K-SAT Automation & Advertising Agency. All rights reserved.</p>
+        <div style="display:flex;gap:1.5rem;">
+          <a href="#" style="font-size:0.75rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#8FA0BF'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.privacy">Privacy Policy</a>
+          <a href="#" style="font-size:0.75rem;color:#5C6B8A;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#8FA0BF'" onmouseout="this.style.color='#5C6B8A'" data-i18n="footer.terms">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ===================== SCRIPTS ===================== -->
+  <script>
+    // Mobile menu
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu  = document.getElementById('mobile-menu');
+    const iconOpen    = document.getElementById('icon-open');
+    const iconClose   = document.getElementById('icon-close');
+
+    menuToggle.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.contains('open');
+      mobileMenu.classList.toggle('open');
+      iconOpen.style.display  = isOpen ? 'block' : 'none';
+      iconClose.style.display = isOpen ? 'none'  : 'block';
+    });
+
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        iconOpen.style.display  = 'block';
+        iconClose.style.display = 'none';
+      });
+    });
+
+    // Contact form
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.innerHTML = 'Message Sent! <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L7 12L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      btn.style.background = 'linear-gradient(135deg,#00B896 0%,#00A0E0 100%)';
+      setTimeout(() => {
+        btn.innerHTML = 'Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        btn.style.background = '';
+        e.target.reset();
+      }, 3500);
+    }
+
+    // ===================== i18n =====================
+    const langFlags = { en:'🇬🇧', tr:'🇹🇷', fr:'🇫🇷', nl:'🇳🇱' };
+    const t = {
+      en:{
+        "nav.badge":"Automation & Advertising Agency","nav.available":"Available for New Projects",
+        "nav.services":"Services","nav.work":"Work","nav.about":"About","nav.process":"Process","nav.contact":"Contact","nav.cta":"Get Started",
+        "hero.line1":"We Automate.","hero.line2":"We Amplify.","hero.line3":"You Dominate.",
+        "hero.desc":"K-SAT is a full-service agency that eliminates operational bottlenecks with intelligent automation and drives measurable growth through data-driven advertising campaigns.",
+        "hero.cta1":"Start Your Project","hero.cta2":"View Our Work",
+        "hero.stat1":"Projects","hero.stat2":"Retention","hero.stat3":"Avg. ROAS",
+        "svc.label":"What We Do","svc.title1":"Two Engines.","svc.title2":"One Agency.",
+        "svc.desc":"We combine intelligent automation with performance advertising — creating compounding growth for ambitious businesses.",
+        "auto.tag":"Automation","auto.title":"Business Automation",
+        "auto.desc":"We identify repetitive bottlenecks in your operations and replace them with intelligent automated workflows — saving time, reducing errors, and scaling without extra headcount.",
+        "auto.i1t":"Workflow Automation","auto.i1d":"Zapier, Make.com, n8n — connect your entire tech stack seamlessly",
+        "auto.i2t":"AI Integration","auto.i2d":"GPT-powered assistants, smart chatbots & AI content pipelines",
+        "auto.i3t":"CRM & Lead Automation","auto.i3d":"Auto-qualify, nurture, and close leads — completely on autopilot",
+        "auto.i4t":"Data Scraping & Enrichment","auto.i4d":"Structured data collection for competitive & market intelligence",
+        "auto.cta":"Automate My Business",
+        "ads.tag":"Advertising","ads.title":"Performance Advertising",
+        "ads.desc":"Data-driven ad campaigns that turn your marketing budget into measurable revenue. We manage the full funnel — from awareness to conversion — and optimize every touchpoint.",
+        "ads.i1t":"Paid Social & Search","ads.i1d":"Meta, Google, TikTok, LinkedIn — all platforms managed for ROI",
+        "ads.i2t":"Creative Strategy & Copy","ads.i2d":"Ad creatives and copy that stop the scroll and drive conversions",
+        "ads.i3t":"SEO & Content Marketing","ads.i3d":"Organic growth through strategic search and content programs",
+        "ads.i4t":"Brand Identity & Design","ads.i4d":"Logo, visual identity, and full brand positioning strategy",
+        "ads.cta":"Boost My Advertising",
+        "stats.s1":"Projects Completed","stats.s2":"Ad Spend Managed","stats.s3":"Client Retention","stats.s4":"Average ROAS",
+        "work.label":"Selected Work","work.title1":"Results We're","work.title2":"Proud Of","work.all":"View All Projects",
+        "work.c1t":"E-commerce Order Automation","work.c1d":"Full order-to-fulfillment pipeline automation for a 7-figure Shopify store. Zero manual intervention.","work.c1o":"Reduced manual processing by 94%","work.c1m":"Retail · Automation","work.c1r":"94% Time Saved",
+        "work.c2t":"SaaS Meta Ad Scale-Up","work.c2d":"Restructured entire Meta funnel for a B2B SaaS — growing ROAS from 1.8x to 5.2x in under 60 days.","work.c2o":"5.2x ROAS achieved in 60 days","work.c2m":"SaaS · Paid Social","work.c2r":"5.2x ROAS",
+        "work.c3t":"AI-Powered Lead Engine","work.c3d":"Built an AI lead qualification and outreach system delivering 300+ qualified leads daily with zero manual effort.","work.c3o":"300 qualified leads/day on autopilot","work.c3m":"B2B · AI Automation","work.c3r":"300+ Leads/Day",
+        "proc.label":"How We Work","proc.title1":"From Discovery","proc.title2":"to Domination",
+        "proc.s1t":"Discovery","proc.s1d":"Deep dive into your business, goals, bottlenecks, and opportunities. No assumptions, just clarity.",
+        "proc.s2t":"Strategy","proc.s2d":"Custom roadmap with clear deliverables, KPIs, and timelines. You review and approve everything.",
+        "proc.s3t":"Build & Launch","proc.s3d":"Fast build, rigorous testing, smooth launch. Weekly updates and transparent communication throughout.",
+        "proc.s4t":"Optimize & Scale","proc.s4d":"Continuous monitoring, A/B testing, and scaling what works. We never stop pushing performance forward.",
+        "testi.label":"Client Stories","testi.title":"What Our Clients Say",
+        "testi.q1":"\"K-SAT automated our entire client onboarding flow. What used to take our team 3 hours per client now happens in 5 minutes. Incredible ROI.\"","testi.r1":"CEO, TechFlow Ltd.",
+        "testi.q2":"\"Our Meta campaigns were burning cash. K-SAT restructured everything in 2 weeks — we hit 4.8x ROAS within a month. Best decision we made this year.\"","testi.r2":"CMO, ShopEase",
+        "testi.q3":"\"They built an AI outreach bot that generates 200+ qualified leads per week. Our sales team stopped cold calling and started just closing. Game-changer.\"","testi.r3":"Founder, GrowScale Agency",
+        "contact.label":"Let's Work Together","contact.title1":"Ready to Automate","contact.title2":"& Accelerate?",
+        "contact.desc":"Book a free 30-minute strategy call. We'll analyze your business, identify quick wins, and propose a custom action plan — completely free, no strings attached.",
+        "contact.c1":"Free 30-min strategy consultation","contact.c2":"Custom proposal delivered within 48 hours","contact.c3":"No lock-in contracts — cancel anytime",
+        "contact.direct":"Or reach us directly:","contact.form.title":"Send Us a Message",
+        "contact.name":"Name","contact.name.ph":"Your name","contact.email":"Email","contact.email.ph":"your@email.com",
+        "contact.company":"Company","contact.company.ph":"Your company","contact.optional":"(optional)",
+        "contact.interest":"I'm interested in","contact.opt0":"Select a service...","contact.opt1":"Business Automation","contact.opt2":"Performance Advertising","contact.opt3":"Both Automation & Advertising","contact.opt4":"Other",
+        "contact.msg":"Message","contact.msg.ph":"Tell us about your project...","contact.submit":"Send Message","contact.sent":"Message Sent!","contact.response":"We typically respond within 4 hours on business days.",
+        "footer.desc":"Automation & Advertising Agency helping ambitious businesses grow faster, smarter, and leaner.",
+        "footer.services":"Services","footer.srv1":"Workflow Automation","footer.srv2":"AI Integration","footer.srv3":"CRM Automation","footer.srv4":"Paid Advertising","footer.srv5":"SEO & Content","footer.srv6":"Brand Identity",
+        "footer.company":"Company","footer.cmp1":"About K-SAT","footer.cmp2":"Case Studies","footer.cmp3":"Our Process","footer.cmp4":"Contact",
+        "footer.copy":"© 2026 K-SAT Automation & Advertising Agency. All rights reserved.","footer.privacy":"Privacy Policy","footer.terms":"Terms of Service"
+      },
+      tr:{
+        "nav.badge":"Otomasyon ve Reklam Ajansı","nav.available":"Yeni Projeler İçin Müsaitiz",
+        "nav.services":"Hizmetler","nav.work":"Çalışmalar","nav.about":"Hakkımızda","nav.process":"Süreç","nav.contact":"İletişim","nav.cta":"Başlayalım",
+        "hero.line1":"Otomatize Ediyoruz.","hero.line2":"Güçlendiriyoruz.","hero.line3":"Sen Kazanıyorsun.",
+        "hero.desc":"K-SAT, akıllı otomasyon ile operasyonel darboğazları ortadan kaldıran ve veri odaklı reklam kampanyaları ile ölçülebilir büyüme sağlayan tam hizmet bir ajansır.",
+        "hero.cta1":"Projeye Başla","hero.cta2":"Çalışmalarımızı Gör",
+        "hero.stat1":"Proje","hero.stat2":"Müşteri Tutma","hero.stat3":"Ort. ROAS",
+        "svc.label":"Ne Yapıyoruz","svc.title1":"İki Motor.","svc.title2":"Tek Ajans.",
+        "svc.desc":"Akıllı otomasyonu performans reklamcılığı ile birleştiriyoruz — iddialı işletmeler için katlanarak büyüme yaratıyoruz.",
+        "auto.tag":"Otomasyon","auto.title":"İş Otomasyonu",
+        "auto.desc":"Operasyonlarınızdaki tekrar eden darboğazları tespit edip akıllı otomatik iş akışlarıyla değiştiriyoruz — zamandan tasarruf, hata azaltma ve ek personel olmadan ölçeklendirme.",
+        "auto.i1t":"İş Akışı Otomasyonu","auto.i1d":"Zapier, Make.com, n8n — tüm teknoloji altyapınızı sorunsuzca entegre edin",
+        "auto.i2t":"Yapay Zeka Entegrasyonu","auto.i2d":"GPT destekli asistanlar, akıllı chatbotlar ve AI içerik hatları",
+        "auto.i3t":"CRM ve Lead Otomasyonu","auto.i3d":"Potansiyel müşterileri otomatik olarak nitelendirin, besleyin ve kapayın",
+        "auto.i4t":"Veri Toplama ve Zenginleştirme","auto.i4d":"Rekabet ve piyasa istihbaratı için yapılandırılmış veri toplama",
+        "auto.cta":"İşimi Otomatize Et",
+        "ads.tag":"Reklamcılık","ads.title":"Performans Reklamcılığı",
+        "ads.desc":"Pazarlama bütçenizi ölçülebilir gelire dönüştüren veri odaklı reklam kampanyaları. Farkındalıktan dönüşüme kadar tüm hunini yönetiyor ve her temas noktasını optimize ediyoruz.",
+        "ads.i1t":"Ücretli Sosyal ve Arama","ads.i1d":"Meta, Google, TikTok, LinkedIn — tüm platformlar ROI odaklı yönetilir",
+        "ads.i2t":"Kreatif Strateji ve Metin","ads.i2d":"Kaydırmayı durduran ve dönüşüm sağlayan reklam görselleri ve metinleri",
+        "ads.i3t":"SEO ve İçerik Pazarlaması","ads.i3d":"Stratejik arama ve içerik programları aracılığıyla organik büyüme",
+        "ads.i4t":"Marka Kimliği ve Tasarım","ads.i4d":"Logo, görsel kimlik ve tam marka konumlandırma stratejisi",
+        "ads.cta":"Reklamlarımı Güçlendir",
+        "stats.s1":"Tamamlanan Proje","stats.s2":"Yönetilen Reklam Bütçesi","stats.s3":"Müşteri Tutma Oranı","stats.s4":"Ortalama ROAS",
+        "work.label":"Seçilmiş Çalışmalar","work.title1":"Gurur Duyduğumuz","work.title2":"Sonuçlar","work.all":"Tüm Projeleri Gör",
+        "work.c1t":"E-ticaret Sipariş Otomasyonu","work.c1d":"7 haneli Shopify mağazası için tam sipariş-teslimat hattı otomasyonu. Sıfır manuel müdahale.","work.c1o":"Manuel işlem %94 azaltıldı","work.c1m":"Perakende · Otomasyon","work.c1r":"%94 Zaman Tasarrufu",
+        "work.c2t":"SaaS Meta Reklam Büyütme","work.c2d":"B2B SaaS için tüm Meta hunisi yeniden yapılandırıldı — 60 günde ROAS 1.8x'ten 5.2x'e çıkarıldı.","work.c2o":"60 günde 5.2x ROAS elde edildi","work.c2m":"SaaS · Ücretli Sosyal","work.c2r":"5.2x ROAS",
+        "work.c3t":"Yapay Zeka Destekli Lead Motoru","work.c3d":"Günlük 300'den fazla nitelikli lead sağlayan AI lead nitelendirme ve erişim sistemi kuruldu.","work.c3o":"Otopilotta günlük 300 nitelikli lead","work.c3m":"B2B · AI Otomasyonu","work.c3r":"300+ Lead/Gün",
+        "proc.label":"Nasıl Çalışıyoruz","proc.title1":"Keşiften","proc.title2":"Hakimiyete",
+        "proc.s1t":"Keşif","proc.s1d":"İşinize, hedeflerinize, darboğazlarınıza ve fırsatlarınıza derin dalış. Varsayım yok, sadece netlik.",
+        "proc.s2t":"Strateji","proc.s2d":"Net teslimatlar, KPI'lar ve zaman çizelgeleriyle özel yol haritası. Her şeyi siz inceler ve onaylarsınız.",
+        "proc.s3t":"İnşa ve Lansman","proc.s3d":"Hızlı inşa, titiz test, sorunsuz lansman. Haftalık güncellemeler ve şeffaf iletişim.",
+        "proc.s4t":"Optimize Et ve Ölçeklendir","proc.s4d":"Sürekli izleme, A/B testi ve işe yarayanı ölçeklendirme. Performansı ileri götürmeyi hiç bırakmıyoruz.",
+        "testi.label":"Müşteri Hikayeleri","testi.title":"Müşterilerimiz Ne Diyor",
+        "testi.q1":"\"K-SAT tüm müşteri karşılama sürecimizi otomatize etti. Müşteri başına 3 saat süren işlem artık 5 dakikada tamamlanıyor. İnanılmaz bir yatırım getirisi.\"","testi.r1":"CEO, TechFlow Ltd.",
+        "testi.q2":"\"Meta kampanyalarımız para yakıyordu. K-SAT 2 haftada her şeyi yeniden yapılandırdı — bir ay içinde 4.8x ROAS'a ulaştık. Bu yılın en iyi kararıydı.\"","testi.r2":"CMO, ShopEase",
+        "testi.q3":"\"Haftada 200'den fazla nitelikli lead üreten bir AI erişim botu inşa ettiler. Satış ekibimiz soğuk arama yapmayı bıraktı, sadece kapamaya odaklandı. Oyun değiştirici.\"","testi.r3":"Kurucu, GrowScale Agency",
+        "contact.label":"Birlikte Çalışalım","contact.title1":"Otomasyona ve","contact.title2":"Büyümeye Hazır mısınız?",
+        "contact.desc":"Ücretsiz 30 dakikalık strateji görüşmesi planlayın. İşinizi analiz eder, hızlı kazanımları tespit eder ve özel bir eylem planı sunarız — tamamen ücretsiz, koşul yok.",
+        "contact.c1":"Ücretsiz 30 dakikalık strateji danışmanlığı","contact.c2":"48 saat içinde özel teklif","contact.c3":"Bağlayıcı sözleşme yok — istediğinizde iptal edin",
+        "contact.direct":"Ya da doğrudan ulaşın:","contact.form.title":"Bize Mesaj Gönderin",
+        "contact.name":"İsim","contact.name.ph":"Adınız","contact.email":"E-posta","contact.email.ph":"e-posta@adresiniz.com",
+        "contact.company":"Şirket","contact.company.ph":"Şirketiniz","contact.optional":"(isteğe bağlı)",
+        "contact.interest":"İlgilendiğim hizmet","contact.opt0":"Bir hizmet seçin...","contact.opt1":"İş Otomasyonu","contact.opt2":"Performans Reklamcılığı","contact.opt3":"Hem Otomasyon hem Reklamcılık","contact.opt4":"Diğer",
+        "contact.msg":"Mesaj","contact.msg.ph":"Projeniz hakkında bize bilgi verin...","contact.submit":"Mesaj Gönder","contact.sent":"Mesaj Gönderildi!","contact.response":"İş günlerinde genellikle 4 saat içinde yanıt veriyoruz.",
+        "footer.desc":"İddialı işletmelerin daha hızlı, daha akıllı ve daha verimli büyümesine yardımcı olan Otomasyon ve Reklam Ajansı.",
+        "footer.services":"Hizmetler","footer.srv1":"İş Akışı Otomasyonu","footer.srv2":"Yapay Zeka Entegrasyonu","footer.srv3":"CRM Otomasyonu","footer.srv4":"Ücretli Reklamlar","footer.srv5":"SEO ve İçerik","footer.srv6":"Marka Kimliği",
+        "footer.company":"Şirket","footer.cmp1":"K-SAT Hakkında","footer.cmp2":"Vaka Çalışmaları","footer.cmp3":"Sürecimiz","footer.cmp4":"İletişim",
+        "footer.copy":"© 2026 K-SAT Otomasyon ve Reklam Ajansı. Tüm hakları saklıdır.","footer.privacy":"Gizlilik Politikası","footer.terms":"Kullanım Koşulları"
+      },
+      fr:{
+        "nav.badge":"Agence d'Automatisation & Publicité","nav.available":"Disponible pour Nouveaux Projets",
+        "nav.services":"Services","nav.work":"Réalisations","nav.about":"À propos","nav.process":"Processus","nav.contact":"Contact","nav.cta":"Commencer",
+        "hero.line1":"Nous Automatisons.","hero.line2":"Nous Amplifions.","hero.line3":"Vous Dominez.",
+        "hero.desc":"K-SAT est une agence full-service qui élimine les goulots d'étranglement avec l'automatisation intelligente et stimule une croissance mesurable grâce à des campagnes publicitaires basées sur les données.",
+        "hero.cta1":"Lancer Mon Projet","hero.cta2":"Voir Nos Travaux",
+        "hero.stat1":"Projets","hero.stat2":"Rétention","hero.stat3":"ROAS Moy.",
+        "svc.label":"Ce que nous faisons","svc.title1":"Deux Moteurs.","svc.title2":"Une Agence.",
+        "svc.desc":"Nous combinons l'automatisation intelligente avec la publicité performance — créant une croissance exponentielle pour les entreprises ambitieuses.",
+        "auto.tag":"Automatisation","auto.title":"Automatisation d'Entreprise",
+        "auto.desc":"Nous identifions les goulots d'étranglement répétitifs dans vos opérations et les remplaçons par des workflows automatisés intelligents — économisant du temps, réduisant les erreurs et permettant la croissance.",
+        "auto.i1t":"Automatisation des Flux","auto.i1d":"Zapier, Make.com, n8n — connectez toute votre pile technologique",
+        "auto.i2t":"Intégration IA","auto.i2d":"Assistants propulsés par GPT, chatbots intelligents & pipelines de contenu AI",
+        "auto.i3t":"Automatisation CRM & Leads","auto.i3d":"Qualifiez, nurturez et fermez des leads automatiquement",
+        "auto.i4t":"Scraping & Enrichissement de Données","auto.i4d":"Collecte de données structurées pour l'intelligence concurrentielle",
+        "auto.cta":"Automatiser Mon Activité",
+        "ads.tag":"Publicité","ads.title":"Publicité Performance",
+        "ads.desc":"Des campagnes publicitaires basées sur les données qui transforment votre budget marketing en revenus mesurables. Nous gérons l'entonnoir complet.",
+        "ads.i1t":"Social Payant & Recherche","ads.i1d":"Meta, Google, TikTok, LinkedIn — toutes les plateformes gérées pour le ROI",
+        "ads.i2t":"Stratégie Créative & Copywriting","ads.i2d":"Visuels et textes publicitaires qui arrêtent le défilement et convertissent",
+        "ads.i3t":"SEO & Marketing de Contenu","ads.i3d":"Croissance organique via des programmes de recherche et contenu stratégiques",
+        "ads.i4t":"Identité de Marque & Design","ads.i4d":"Logo, identité visuelle et stratégie de positionnement de marque complète",
+        "ads.cta":"Booster Ma Publicité",
+        "stats.s1":"Projets Réalisés","stats.s2":"Budget Pub Géré","stats.s3":"Rétention Clients","stats.s4":"ROAS Moyen",
+        "work.label":"Travaux Sélectionnés","work.title1":"Des Résultats Dont","work.title2":"Nous Sommes Fiers","work.all":"Voir Tous les Projets",
+        "work.c1t":"Automatisation Commandes E-commerce","work.c1d":"Automatisation complète du pipeline commande-livraison pour une boutique Shopify à 7 chiffres. Zéro intervention manuelle.","work.c1o":"Traitement manuel réduit de 94%","work.c1m":"Commerce · Automatisation","work.c1r":"94% de Temps Économisé",
+        "work.c2t":"Montée en Puissance Meta Ads SaaS","work.c2d":"Restructuration complète de l'entonnoir Meta pour un SaaS B2B — ROAS passé de 1.8x à 5.2x en moins de 60 jours.","work.c2o":"ROAS 5.2x atteint en 60 jours","work.c2m":"SaaS · Social Payant","work.c2r":"5.2x ROAS",
+        "work.c3t":"Moteur de Leads Propulsé par IA","work.c3d":"Construction d'un système IA livrant 300+ leads qualifiés par jour sans effort manuel.","work.c3o":"300 leads qualifiés/jour en automatique","work.c3m":"B2B · Automatisation IA","work.c3r":"300+ Leads/Jour",
+        "proc.label":"Notre Méthode","proc.title1":"De la Découverte","proc.title2":"à la Domination",
+        "proc.s1t":"Découverte","proc.s1d":"Plongée profonde dans votre activité, objectifs, goulots d'étranglement et opportunités. Pas d'hypothèses, juste de la clarté.",
+        "proc.s2t":"Stratégie","proc.s2d":"Feuille de route sur mesure avec livrables, KPIs et calendriers clairs. Vous examinez et approuvez tout.",
+        "proc.s3t":"Construction & Lancement","proc.s3d":"Construction rapide, tests rigoureux, lancement fluide. Mises à jour hebdomadaires et communication transparente.",
+        "proc.s4t":"Optimisation & Croissance","proc.s4d":"Surveillance continue, tests A/B et mise à l'échelle de ce qui fonctionne. Nous ne cessons jamais d'améliorer.",
+        "testi.label":"Témoignages","testi.title":"Ce que Disent Nos Clients",
+        "testi.q1":"\"K-SAT a automatisé tout notre processus d'intégration client. Ce qui prenait 3 heures par client se fait maintenant en 5 minutes. ROI incroyable.\"","testi.r1":"PDG, TechFlow Ltd.",
+        "testi.q2":"\"Nos campagnes Meta brûlaient l'argent. K-SAT a tout restructuré en 2 semaines — nous avons atteint 4.8x ROAS en un mois. Meilleure décision de l'année.\"","testi.r2":"CMO, ShopEase",
+        "testi.q3":"\"Ils ont construit un bot IA qui génère 200+ leads qualifiés par semaine. Notre équipe commerciale a arrêté d'appeler à froid. Révolutionnaire.\"","testi.r3":"Fondateur, GrowScale Agency",
+        "contact.label":"Travaillons Ensemble","contact.title1":"Prêt à Automatiser","contact.title2":"& Accélérer ?",
+        "contact.desc":"Réservez un appel stratégique gratuit de 30 minutes. Nous analyserons votre activité et proposerons un plan d'action personnalisé — totalement gratuit.",
+        "contact.c1":"Consultation stratégique gratuite de 30 min","contact.c2":"Proposition personnalisée livrée sous 48 heures","contact.c3":"Pas de contrats bloquants — annulez quand vous voulez",
+        "contact.direct":"Ou contactez-nous directement :","contact.form.title":"Envoyez-nous un Message",
+        "contact.name":"Nom","contact.name.ph":"Votre nom","contact.email":"E-mail","contact.email.ph":"votre@email.com",
+        "contact.company":"Entreprise","contact.company.ph":"Votre entreprise","contact.optional":"(optionnel)",
+        "contact.interest":"Je suis intéressé par","contact.opt0":"Sélectionnez un service...","contact.opt1":"Automatisation d'Entreprise","contact.opt2":"Publicité à la Performance","contact.opt3":"Automatisation & Publicité","contact.opt4":"Autre",
+        "contact.msg":"Message","contact.msg.ph":"Parlez-nous de votre projet...","contact.submit":"Envoyer le Message","contact.sent":"Message Envoyé !","contact.response":"Nous répondons généralement sous 4 heures les jours ouvrables.",
+        "footer.desc":"Agence d'Automatisation & Publicité aidant les entreprises ambitieuses à croître plus vite et plus intelligemment.",
+        "footer.services":"Services","footer.srv1":"Automatisation des Flux","footer.srv2":"Intégration IA","footer.srv3":"Automatisation CRM","footer.srv4":"Publicité Payante","footer.srv5":"SEO & Contenu","footer.srv6":"Identité de Marque",
+        "footer.company":"Entreprise","footer.cmp1":"À propos de K-SAT","footer.cmp2":"Études de Cas","footer.cmp3":"Notre Processus","footer.cmp4":"Contact",
+        "footer.copy":"© 2026 K-SAT Agence d'Automatisation & Publicité. Tous droits réservés.","footer.privacy":"Politique de Confidentialité","footer.terms":"Conditions d'Utilisation"
+      },
+      nl:{
+        "nav.badge":"Automatisering & Reclamebureau","nav.available":"Beschikbaar voor Nieuwe Projecten",
+        "nav.services":"Diensten","nav.work":"Werk","nav.about":"Over Ons","nav.process":"Werkwijze","nav.contact":"Contact","nav.cta":"Aan de slag",
+        "hero.line1":"Wij Automatiseren.","hero.line2":"Wij Versterken.","hero.line3":"Jij Domineert.",
+        "hero.desc":"K-SAT is een full-service bureau dat operationele knelpunten elimineert met intelligente automatisering en meetbare groei stimuleert via datagedreven advertentiecampagnes.",
+        "hero.cta1":"Mijn Project Starten","hero.cta2":"Ons Werk Bekijken",
+        "hero.stat1":"Projecten","hero.stat2":"Klantbehoud","hero.stat3":"Gem. ROAS",
+        "svc.label":"Wat We Doen","svc.title1":"Twee Motoren.","svc.title2":"Één Bureau.",
+        "svc.desc":"We combineren intelligente automatisering met performance advertising — en creëren samengestelde groei voor ambitieuze bedrijven.",
+        "auto.tag":"Automatisering","auto.title":"Bedrijfsautomatisering",
+        "auto.desc":"We identificeren repetitieve knelpunten in uw activiteiten en vervangen deze door intelligente geautomatiseerde workflows — tijdsbesparing, foutreductie en schalen zonder extra personeel.",
+        "auto.i1t":"Workflow Automatisering","auto.i1d":"Zapier, Make.com, n8n — verbind uw volledige technologiestack naadloos",
+        "auto.i2t":"AI Integratie","auto.i2d":"GPT-gestuurde assistenten, slimme chatbots & AI-contentpijplijnen",
+        "auto.i3t":"CRM & Lead Automatisering","auto.i3d":"Automatisch kwalificeren, opvolgen en sluiten — volledig op de automatische piloot",
+        "auto.i4t":"Data Scraping & Verrijking","auto.i4d":"Gestructureerde dataverzameling voor concurrentie- en marktinformatie",
+        "auto.cta":"Mijn Bedrijf Automatiseren",
+        "ads.tag":"Adverteren","ads.title":"Performance Advertising",
+        "ads.desc":"Datagestuurde advertentiecampagnes die uw marketingbudget omzetten in meetbare omzet. We beheren de volledige funnel — van bewustzijn tot conversie.",
+        "ads.i1t":"Betaald Sociaal & Zoeken","ads.i1d":"Meta, Google, TikTok, LinkedIn — alle platforms beheerd voor ROI",
+        "ads.i2t":"Creatieve Strategie & Tekst","ads.i2d":"Advertentie-creatives en teksten die het scrollen stoppen en converteren",
+        "ads.i3t":"SEO & Contentmarketing","ads.i3d":"Organische groei via strategische zoek- en contentprogramma's",
+        "ads.i4t":"Merkidentiteit & Design","ads.i4d":"Logo, visuele identiteit en volledige merkpositioneringsstrategie",
+        "ads.cta":"Mijn Adverteren Verbeteren",
+        "stats.s1":"Projecten Voltooid","stats.s2":"Reclamebudget Beheerd","stats.s3":"Klantbehoud","stats.s4":"Gemiddelde ROAS",
+        "work.label":"Geselecteerd Werk","work.title1":"Resultaten Waar We","work.title2":"Trots Op Zijn","work.all":"Alle Projecten Bekijken",
+        "work.c1t":"E-commerce Bestelautomatisering","work.c1d":"Volledige order-tot-levering pijplijn automatisering voor een 7-cijferige Shopify winkel. Nul handmatige tussenkomst.","work.c1o":"Handmatige verwerking met 94% verminderd","work.c1m":"Retail · Automatisering","work.c1r":"94% Tijdsbesparing",
+        "work.c2t":"SaaS Meta Advertentie Opschaling","work.c2d":"Volledige Meta funnel geherstructureerd voor een B2B SaaS — ROAS gegroeid van 1.8x naar 5.2x in minder dan 60 dagen.","work.c2o":"5.2x ROAS bereikt in 60 dagen","work.c2m":"SaaS · Betaald Sociaal","work.c2r":"5.2x ROAS",
+        "work.c3t":"AI-gedreven Lead Engine","work.c3d":"Een AI-systeem gebouwd dat dagelijks 300+ gekwalificeerde leads levert zonder handmatige inspanning.","work.c3o":"300 gekwalificeerde leads/dag op automatische piloot","work.c3m":"B2B · AI Automatisering","work.c3r":"300+ Leads/Dag",
+        "proc.label":"Onze Werkwijze","proc.title1":"Van Ontdekking","proc.title2":"tot Dominantie",
+        "proc.s1t":"Ontdekking","proc.s1d":"Diepgaande duik in uw bedrijf, doelen, knelpunten en kansen. Geen aannames, alleen helderheid.",
+        "proc.s2t":"Strategie","proc.s2d":"Op maat gemaakt stappenplan met duidelijke deliverables, KPI's en tijdlijnen. U beoordeelt en keurt alles goed.",
+        "proc.s3t":"Bouwen & Lanceren","proc.s3d":"Snel bouwen, rigoureus testen, soepel lanceren. Wekelijkse updates en transparante communicatie.",
+        "proc.s4t":"Optimaliseren & Opschalen","proc.s4d":"Continue monitoring, A/B-testen en opschalen wat werkt. We stoppen nooit met het verbeteren van prestaties.",
+        "testi.label":"Klantverhalen","testi.title":"Wat Onze Klanten Zeggen",
+        "testi.q1":"\"K-SAT heeft ons volledige onboardingproces voor klanten geautomatiseerd. Wat voorheen 3 uur per klant duurde, duurt nu 5 minuten. Ongelooflijke ROI.\"","testi.r1":"CEO, TechFlow Ltd.",
+        "testi.q2":"\"Onze Meta-campagnes verbrandden geld. K-SAT heeft alles in 2 weken geherstructureerd — we bereikten 4.8x ROAS binnen een maand. Beste beslissing van het jaar.\"","testi.r2":"CMO, ShopEase",
+        "testi.q3":"\"Ze bouwden een AI-outreachbot die 200+ gekwalificeerde leads per week genereert. Ons verkoopteam stopte met cold calling. Revolutionair.\"","testi.r3":"Oprichter, GrowScale Agency",
+        "contact.label":"Laten We Samenwerken","contact.title1":"Klaar om te Automatiseren","contact.title2":"& te Versnellen?",
+        "contact.desc":"Boek een gratis strategiegesprek van 30 minuten. We analyseren uw bedrijf en stellen een op maat gemaakt actieplan voor — volledig gratis.",
+        "contact.c1":"Gratis strategieconsultatie van 30 min","contact.c2":"Op maat gemaakt voorstel binnen 48 uur","contact.c3":"Geen bindende contracten — annuleer wanneer u wilt",
+        "contact.direct":"Of neem direct contact op:","contact.form.title":"Stuur Ons een Bericht",
+        "contact.name":"Naam","contact.name.ph":"Uw naam","contact.email":"E-mail","contact.email.ph":"uw@email.com",
+        "contact.company":"Bedrijf","contact.company.ph":"Uw bedrijf","contact.optional":"(optioneel)",
+        "contact.interest":"Ik ben geïnteresseerd in","contact.opt0":"Selecteer een dienst...","contact.opt1":"Bedrijfsautomatisering","contact.opt2":"Performance Advertising","contact.opt3":"Automatisering & Adverteren","contact.opt4":"Anders",
+        "contact.msg":"Bericht","contact.msg.ph":"Vertel ons over uw project...","contact.submit":"Bericht Versturen","contact.sent":"Bericht Verstuurd!","contact.response":"We reageren doorgaans binnen 4 uur op werkdagen.",
+        "footer.desc":"Automatisering & Reclamebureau dat ambitieuze bedrijven helpt sneller, slimmer en slanker te groeien.",
+        "footer.services":"Diensten","footer.srv1":"Workflow Automatisering","footer.srv2":"AI Integratie","footer.srv3":"CRM Automatisering","footer.srv4":"Betaalde Advertenties","footer.srv5":"SEO & Content","footer.srv6":"Merkidentiteit",
+        "footer.company":"Bedrijf","footer.cmp1":"Over K-SAT","footer.cmp2":"Casestudies","footer.cmp3":"Onze Werkwijze","footer.cmp4":"Contact",
+        "footer.copy":"© 2026 K-SAT Automatisering & Reclamebureau. Alle rechten voorbehouden.","footer.privacy":"Privacybeleid","footer.terms":"Servicevoorwaarden"
+      }
+    };
+
+    let currentLang = localStorage.getItem('ksat_lang') || (navigator.language.startsWith('tr') ? 'tr' : navigator.language.startsWith('fr') ? 'fr' : navigator.language.startsWith('nl') ? 'nl' : 'en');
+
+    function setLang(lang) {
+      if (!t[lang]) lang = 'en';
+      currentLang = lang;
+      const d = t[lang];
+      // Text content
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (d[key] !== undefined) el.textContent = d[key];
+      });
+      // Placeholders
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.dataset.i18nPh;
+        if (d[key] !== undefined) el.placeholder = d[key];
+      });
+      // Select options
+      document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+        const key = el.dataset.i18nOpt;
+        if (d[key] !== undefined) el.textContent = d[key];
+      });
+      // Update nav UI
+      document.getElementById('lang-flag').textContent = langFlags[lang];
+      document.getElementById('lang-code').textContent = lang.toUpperCase();
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      document.documentElement.lang = lang;
+      localStorage.setItem('ksat_lang', lang);
+      document.getElementById('lang-dropdown').classList.remove('open');
+      document.getElementById('lang-toggle').classList.remove('open');
+    }
+
+    // Language dropdown toggle
+    const langToggle = document.getElementById('lang-toggle');
+    const langDropdown = document.getElementById('lang-dropdown');
+
+    langToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = langDropdown.classList.contains('open');
+      langDropdown.classList.toggle('open');
+      langToggle.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      langDropdown.classList.remove('open');
+      langToggle.classList.remove('open');
+    });
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setLang(btn.dataset.lang);
+        // also close mobile menu
+        mobileMenu.classList.remove('open');
+        iconOpen.style.display = 'block';
+        iconClose.style.display = 'none';
+      });
+    });
+
+    // Apply language on load
+    setLang(currentLang);
+
+    // Active nav link highlight on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks  = document.querySelectorAll('a.nav-link');
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            const isActive = link.getAttribute('href') === '#' + entry.target.id;
+            link.style.color = isActive ? '#E2EAF8' : '';
+          });
+        }
+      });
+    }, { threshold: 0.35 });
+
+    sections.forEach(s => observer.observe(s));
+  </script>
+
+  <!-- WebGL animated shader background -->
+  <script>
+  (function() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'shader-bg';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
+    document.body.prepend(canvas);
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return; // CSS fallback #07090F applied via stylesheet
+
+    const vsSource = `
+      attribute vec4 aPos;
+      void main() { gl_Position = aPos; }
+    `;
+
+    const fsSource = `
+      precision mediump float;
+      uniform vec2 iResolution;
+      uniform float iTime;
+
+      void main() {
+        vec2 uv = gl_FragCoord.xy / iResolution;
+        vec2 p  = uv * 2.0 - 1.0;
+        p.x *= iResolution.x / iResolution.y;
+
+        // Dark base gradient matching #07090F → slightly purple-dark
+        vec3 col = mix(vec3(0.027, 0.035, 0.059), vec3(0.040, 0.022, 0.075), uv.y);
+
+        // Plasma lines (16)
+        float lineGlow = 0.0;
+        for (int i = 0; i < 16; i++) {
+          float fi = float(i);
+          float t  = iTime * 0.10 + fi * 0.628;
+          float x  = p.x + sin(p.y * 1.5 + t) * 0.45 + cos(iTime * 0.065 + fi * 0.44) * 0.5;
+          lineGlow += smoothstep(0.022, 0.0, abs(x)) * (0.25 + 0.55 * sin(fi * 1.35 + iTime * 0.04));
+        }
+
+        // Floating glow circles (4)
+        float circleGlow = 0.0;
+        for (int i = 0; i < 4; i++) {
+          float fi = float(i);
+          vec2  c  = vec2(sin(iTime * 0.055 + fi * 1.62) * 1.1, cos(iTime * 0.038 + fi * 2.08) * 0.85);
+          float d  = length(p - c);
+          circleGlow += exp(-d * d * 1.8) * 0.055;
+        }
+
+        col += vec3(0.22, 0.09, 0.45) * lineGlow * 0.08;
+        col += vec3(0.00, 0.36, 0.30) * circleGlow;
+        col  = clamp(col, 0.0, 0.22);
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    function makeShader(type, src) {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      return sh;
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, makeShader(gl.VERTEX_SHADER,   vsSource));
+    gl.attachShader(prog, makeShader(gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes  = gl.getUniformLocation(prog, 'iResolution');
+    const uTime = gl.getUniformLocation(prog, 'iTime');
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const t0 = performance.now();
+    (function render() {
+      gl.uniform2f(uRes,  canvas.width, canvas.height);
+      gl.uniform1f(uTime, (performance.now() - t0) * 0.001);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    })();
+  })();
+  </script>
+
+</body>
+</html>
