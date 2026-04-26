@@ -340,6 +340,35 @@
       .marquee-track{animation:none}
     }
   </style>
+
+  <!-- ===================== TRACKING (Pixel + GA4) ===================== -->
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1386191349903860');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=1386191349903860&ev=PageView&noscript=1"/>
+  </noscript>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z0N1B9S923"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Z0N1B9S923', { 'send_page_view': true });
+  </script>
 </head>
 <body>
   <!-- GTM noscript -->
@@ -2127,7 +2156,7 @@
         'faq.a6':"Très probablement oui. Les 9 verticales affichées sont nos kits de démarrage — angles, hooks et formats pré-calibrés. Pour un secteur non listé, nous prévoyons une phase 0 supplémentaire (1 semaine) pour calibrer les angles et personas. Les secteurs réglementés stricts (banque, pharma, jeux d'argent) nécessitent un échange préalable sur la conformité.",
 
         'cookie.title':'Cookies & confidentialité',
-        'cookie.body':"Nous utilisons des cookies pour mesurer l'audience (Google Tag Manager) et améliorer votre expérience. Aucun cookie n'est posé tant que vous n'avez pas accepté.",
+        'cookie.body':"Nous utilisons des cookies pour mesurer l'audience (Google Analytics, Meta Pixel, LinkedIn Insight, GTM) et améliorer votre expérience.",
         'cookie.accept':'Accepter','cookie.refuse':'Refuser',
 
         'eng.label':'Comment travailler ensemble','eng.title1':'Trois formats.','eng.title2':'Choisissez le vôtre.',
@@ -2262,7 +2291,7 @@
         'faq.a6':"Most likely yes. The 9 verticals shown are our starter kits — angles, hooks and formats pre-calibrated. For an unlisted sector we add a phase 0 (1 week) to calibrate angles and personas. Strictly regulated sectors (banking, pharma, gambling) require a prior compliance discussion.",
 
         'cookie.title':'Cookies & privacy',
-        'cookie.body':"We use cookies to measure audience (Google Tag Manager) and improve your experience. No cookies are placed until you accept.",
+        'cookie.body':"We use cookies to measure audience (Google Analytics, Meta Pixel, LinkedIn Insight, GTM) and improve your experience.",
         'cookie.accept':'Accept','cookie.refuse':'Refuse',
 
         'eng.label':'How we work together','eng.title1':'Three formats.','eng.title2':'Pick yours.',
@@ -2397,7 +2426,7 @@
         'faq.a6':'Hoogstwaarschijnlijk ja. De 9 verticals zijn onze starter kits — angles, hooks en formats al gekalibreerd. Voor een niet-vermelde sector voegen we een fase 0 toe (1 week) om angles en persona\'s te kalibreren. Strikt gereguleerde sectoren (bank, pharma, kansspelen) vereisen vooraf een gesprek over compliance.',
 
         'cookie.title':'Cookies & privacy',
-        'cookie.body':'We gebruiken cookies om publiek te meten (Google Tag Manager) en je ervaring te verbeteren. Geen cookies geplaatst tot je accepteert.',
+        'cookie.body':'We gebruiken cookies om publiek te meten (Google Analytics, Meta Pixel, LinkedIn Insight, GTM) en je ervaring te verbeteren.',
         'cookie.accept':'Accepteer','cookie.refuse':'Weigeren',
 
         'eng.label':'Hoe we samenwerken','eng.title1':'Drie formaten.','eng.title2':'Kies de jouwe.',
@@ -2532,7 +2561,7 @@
         'faq.a6':"Çoğu zaman evet. Gösterilen 9 dikey starter kit'lerimiz — angles, hooks ve formatlar önceden kalibre edilmiş. Listede olmayan sektör için angles ve persona kalibrasyonu için ek faz 0 (1 hafta) ekleriz. Sıkı düzenlemeli sektörler (banka, ilaç, kumar) öncesinde uyumluluk görüşmesi gerektirir.",
 
         'cookie.title':'Çerezler & gizlilik',
-        'cookie.body':"İzlenme ölçümü (Google Tag Manager) ve deneyiminizi iyileştirmek için çerez kullanıyoruz. Onay vermeden hiçbir çerez yerleştirilmez.",
+        'cookie.body':"İzlenme ölçümü (Google Analytics, Meta Pixel, LinkedIn Insight, GTM) ve deneyiminizi iyileştirmek için çerez kullanıyoruz.",
         'cookie.accept':'Kabul et','cookie.refuse':'Reddet',
 
         'eng.label':'Birlikte nasıl çalışırız','eng.title1':'Üç format.','eng.title2':'Sizinkini seçin.',
@@ -2654,5 +2683,65 @@
     document.querySelectorAll('.lang-option').forEach(b => b.addEventListener('click', () => setTimeout(updateRouting, 30)));
     updateRouting();
   </script>
+
+  <!-- LinkedIn Insight Tag -->
+  <script type="text/javascript">
+    _linkedin_partner_id = "9030554";
+    window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+    window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+  </script>
+  <script type="text/javascript">
+    (function(l) {
+      if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+      window.lintrk.q=[]}
+      var s = document.getElementsByTagName("script")[0];
+      var b = document.createElement("script");
+      b.type = "text/javascript";b.async = true;
+      b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+      s.parentNode.insertBefore(b, s);
+    })(window.lintrk);
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none;" alt=""
+         src="https://px.ads.linkedin.com/collect/?pid=9030554&fmt=gif" />
+  </noscript>
+
+  <!-- Tracking Events: Contact (mailto/tel) + Lead (Formspree, wa.me, demo CTAs) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Contact: mailto/tel
+      document.querySelectorAll('a[href^="mailto:"]').forEach(function(a) {
+        a.addEventListener('click', function() {
+          if (window.fbq) window.fbq('track', 'Contact', { content_name: 'email_click' });
+          if (window.gtag) window.gtag('event', 'contact', {
+            event_category: 'engagement', event_label: 'email_click'
+          });
+        });
+      });
+      document.querySelectorAll('a[href^="tel:"]').forEach(function(a) {
+        a.addEventListener('click', function() {
+          if (window.fbq) window.fbq('track', 'Contact', { content_name: 'phone_click' });
+          if (window.gtag) window.gtag('event', 'contact', {
+            event_category: 'engagement', event_label: 'phone_click'
+          });
+        });
+      });
+
+      // Lead: Formspree form submit, WhatsApp links, demo CTA
+      document.querySelectorAll('form[action*="formspree"], a[href*="wa.me"], a[data-event="lead"], button[data-event="lead"], form[data-event="lead"]').forEach(function(el) {
+        var evt = el.tagName === 'FORM' ? 'submit' : 'click';
+        el.addEventListener(evt, function() {
+          var label = el.dataset.eventLabel
+            || (el.tagName === 'FORM' ? 'form_submit'
+            : (el.href && el.href.includes('wa.me') ? 'whatsapp_dm' : 'demo_request'));
+          if (window.fbq) window.fbq('track', 'Lead', { content_name: label });
+          if (window.gtag) window.gtag('event', 'generate_lead', {
+            event_category: 'engagement', event_label: label, value: 1
+          });
+        });
+      });
+    });
+  </script>
+
 </body>
 </html>

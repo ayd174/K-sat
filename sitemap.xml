@@ -15,6 +15,13 @@
   </url>
 
   <url>
+    <loc>https://k-sat.be/links.html</loc>
+    <lastmod>2026-04-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://k-sat.be/privacy.html</loc>
     <lastmod>2026-04-26</lastmod>
     <changefreq>yearly</changefreq>

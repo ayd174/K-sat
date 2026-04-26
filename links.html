@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-SAT — Links</title>
+  <meta name="description" content="K-Sat AI Agency · Automation for every business · Brussels 🇧🇪" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/brand_assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0A0E1A;
+      --bg-soft: #11172A;
+      --text: #E2EAF8;
+      --text-soft: #8A95B3;
+      --text-faint: #5C6B8A;
+      --accent: #00E5BE;
+      --border: rgba(255,255,255,0.08);
+      --hover: rgba(0,229,190,0.06);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #0A0E1A 0%, #11172A 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4rem 1.25rem 3rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,229,190,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .brand-mark {
+      width: 88px; height: 88px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(12px);
+      margin-bottom: 0.5rem;
+    }
+    .brand-mark img {
+      width: 64px; height: auto;
+      filter: invert(1);
+      opacity: 0.92;
+    }
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.02em;
+      text-align: center;
+    }
+    .tagline {
+      color: var(--text-soft);
+      font-size: 0.9375rem;
+      text-align: center;
+      margin: 0;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+    .tagline-fr {
+      color: var(--text-faint);
+      font-size: 0.8125rem;
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 1rem 1.25rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+    .link-btn:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .link-btn .icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .link-btn .label {
+      flex: 1;
+    }
+    .link-btn .arrow {
+      color: var(--text-faint);
+      font-size: 0.875rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .link-btn:hover .arrow {
+      color: var(--accent);
+      transform: translateX(2px);
+    }
+    .link-btn--primary {
+      background: rgba(0,229,190,0.08);
+      border-color: rgba(0,229,190,0.25);
+    }
+    .link-btn--primary .label {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    footer {
+      margin-top: 2.5rem;
+      color: var(--text-faint);
+      font-size: 0.75rem;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    footer a {
+      color: var(--text-soft);
+      text-decoration: none;
+    }
+    footer a:hover { color: var(--accent); }
+  </style>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1386191349903860');
+    fbq('track', 'PageView');
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=1386191349903860&ev=PageView&noscript=1"/>
+  </noscript>
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z0N1B9S923"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Z0N1B9S923', { 'send_page_view': true });
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand-mark">
+      <img src="brand_assets/logo-K-Sat.png" alt="K-Sat" />
+    </div>
+    <h1>K-Sat AI Agency</h1>
+    <p class="tagline">
+      Automation for every business 🇧🇪
+      <span class="tagline-fr">L'automatisation pour chaque entreprise.</span>
+    </p>
+
+    <nav class="links">
+      <a class="link-btn link-btn--primary"
+         href="/?utm_source=instagram&utm_medium=organic&utm_campaign=launch_w1w2&utm_content=link_homepage"
+         data-link-name="homepage">
+        <span class="icon">🌐</span>
+        <span class="label">Visit k-sat.be</span>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="link-btn"
+         href="/#contact?utm_source=instagram&utm_medium=organic&utm_campaign=launch_w1w2&utm_content=link_demo"
+         data-event="lead"
+         data-event-label="ig_link_tree_demo"
+         data-link-name="demo">
+        <span class="icon">🚀</span>
+        <span class="label">Request a 15-min demo</span>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="link-btn"
+         href="https://www.youtube.com/@Ksat_Agency?utm_source=instagram&utm_medium=organic&utm_campaign=launch_w1w2&utm_content=link_youtube"
+         target="_blank" rel="noopener"
+         data-link-name="youtube">
+        <span class="icon">📺</span>
+        <span class="label">YouTube — brand film &amp; shorts</span>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="link-btn"
+         href="https://www.linkedin.com/company/k-sat-agency?utm_source=instagram&utm_medium=organic&utm_campaign=launch_w1w2&utm_content=link_linkedin"
+         target="_blank" rel="noopener"
+         data-link-name="linkedin">
+        <span class="icon">💼</span>
+        <span class="label">LinkedIn</span>
+        <span class="arrow">→</span>
+      </a>
+
+      <a class="link-btn"
+         href="mailto:contact@k-sat.be"
+         data-link-name="email">
+        <span class="icon">📧</span>
+        <span class="label">contact@k-sat.be</span>
+        <span class="arrow">→</span>
+      </a>
+    </nav>
+
+    <footer>
+      Brussels · Belgium · Türkiye · EU<br/>
+      © 2026 K-Sat AI Agency · <a href="/">k-sat.be</a>
+    </footer>
+  </div>
+
+  <!-- LinkedIn Insight Tag -->
+  <script type="text/javascript">
+    _linkedin_partner_id = "9030554";
+    window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+    window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+  </script>
+  <script type="text/javascript">
+    (function(l) {
+      if (!l){window.lintrk = function(a,b){window.lintrk.q.push([a,b])};
+      window.lintrk.q=[]}
+      var s = document.getElementsByTagName("script")[0];
+      var b = document.createElement("script");
+      b.type = "text/javascript";b.async = true;
+      b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+      s.parentNode.insertBefore(b, s);
+    })(window.lintrk);
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none;" alt=""
+         src="https://px.ads.linkedin.com/collect/?pid=9030554&fmt=gif" />
+  </noscript>
+
+  <!-- Tracking Events: link clicks + Contact + Lead -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Generic link click tracking (every button on this page)
+      document.querySelectorAll('a[data-link-name]').forEach(function(a) {
+        a.addEventListener('click', function() {
+          var name = a.dataset.linkName;
+          if (window.gtag) window.gtag('event', 'link_click', {
+            event_category: 'link_tree',
+            event_label: name,
+            link_url: a.href
+          });
+        });
+      });
+
+      // Contact: mailto
+      document.querySelectorAll('a[href^="mailto:"]').forEach(function(a) {
+        a.addEventListener('click', function() {
+          if (window.fbq) window.fbq('track', 'Contact', { content_name: 'email_click' });
+          if (window.gtag) window.gtag('event', 'contact', {
+            event_category: 'engagement', event_label: 'email_click'
+          });
+        });
+      });
+
+      // Lead: data-event="lead"
+      document.querySelectorAll('a[data-event="lead"]').forEach(function(el) {
+        el.addEventListener('click', function() {
+          var label = el.dataset.eventLabel || 'demo_request';
+          if (window.fbq) window.fbq('track', 'Lead', { content_name: label });
+          if (window.gtag) window.gtag('event', 'generate_lead', {
+            event_category: 'engagement', event_label: label, value: 1
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
