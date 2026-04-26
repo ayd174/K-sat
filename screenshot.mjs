@@ -41,7 +41,22 @@ function nextFilename() {
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
   // Wait for fonts
-  await new Promise(r => setTimeout(r, 1500));
+  await new Promise(r => setTimeout(r, 800));
+
+  // Scroll through the page to trigger IntersectionObserver reveal animations
+  await page.evaluate(async () => {
+    const total = document.documentElement.scrollHeight;
+    const step = window.innerHeight * 0.6;
+    for (let y = 0; y < total; y += step) {
+      window.scrollTo(0, y);
+      await new Promise(r => setTimeout(r, 90));
+    }
+    window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 250));
+    // Force-reveal any element still hidden (counters etc. that may have skipped)
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => el.classList.add('in'));
+  });
+  await new Promise(r => setTimeout(r, 600));
 
   const outPath = nextFilename();
   await page.screenshot({ path: outPath, fullPage: true });

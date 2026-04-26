@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#07090F" />
+  <link rel="icon" href="brand_assets/logo-K-Sat.png" type="image/png" />
+  <title>404 · Page introuvable · K-SAT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;background:#07090F}
+    body{color:#8FA0BF;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;position:relative;overflow:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:1;mix-blend-mode:overlay}
+    .glow{position:fixed;border-radius:50%;filter:blur(120px);opacity:.45;pointer-events:none;z-index:0}
+    .glow-1{width:600px;height:600px;background:rgba(0,229,190,.15);top:-200px;left:-200px}
+    .glow-2{width:500px;height:500px;background:rgba(123,92,240,.15);bottom:-200px;right:-200px}
+    .glow-3{width:380px;height:380px;background:rgba(255,107,74,.1);top:50%;left:50%;transform:translate(-50%,-50%)}
+    .grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,190,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,190,.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:1}
+    .content{position:relative;z-index:10;max-width:560px}
+    .logo{margin:0 auto 2.4rem;height:62px;width:auto;filter:invert(1);opacity:.92}
+    .four-zero-four{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(6rem,18vw,12rem);line-height:.9;letter-spacing:-.05em;background:linear-gradient(135deg,#00E5BE 0%,#7B5CF0 50%,#FF6B4A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:glitch 5s ease-in-out infinite}
+    @keyframes glitch{0%,90%,100%{transform:translateX(0)}92%{transform:translateX(-2px) skewX(-1deg)}94%{transform:translateX(2px) skewX(1deg)}96%{transform:translateX(0)}}
+    h1{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(1.4rem,3vw,2rem);color:#E2EAF8;letter-spacing:-.018em;margin:1.4rem 0 .8rem;line-height:1.2}
+    p{font-size:1rem;line-height:1.7;color:#8FA0BF;max-width:440px;margin:0 auto 2.2rem}
+    .code-block{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;background:rgba(13,19,34,.7);border:1px solid rgba(0,229,190,.18);font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#00E5BE;margin-bottom:1.6rem}
+    .code-block .dot{width:6px;height:6px;border-radius:50%;background:#FF6B4A;box-shadow:0 0 8px rgba(255,107,74,.6);animation:pulse 1.6s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .cta-row{display:flex;flex-wrap:wrap;justify-content:center;gap:14px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:.78rem 1.7rem;border-radius:.6rem;font-weight:600;font-size:.92rem;text-decoration:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,background .2s}
+    .btn-primary{background:linear-gradient(135deg,#00E5BE,#00C4FF);color:#07090F;box-shadow:0 4px 22px rgba(0,229,190,.3)}
+    .btn-primary:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 10px 36px rgba(0,229,190,.42)}
+    .btn-ghost{border:1px solid rgba(255,255,255,.1);color:#C9D5EE;background:rgba(255,255,255,.02)}
+    .btn-ghost:hover{background:rgba(0,229,190,.06);border-color:rgba(0,229,190,.3);transform:translateY(-2px);color:#E2EAF8}
+    .quick-links{margin-top:3rem;display:flex;flex-wrap:wrap;justify-content:center;gap:1.4rem;font-size:.82rem}
+    .quick-links a{color:#5C6B8A;text-decoration:none;transition:color .2s}
+    .quick-links a:hover{color:#00E5BE}
+    .quick-links span{color:#1E2D48}
+  </style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  <div class="grid-bg"></div>
+
+  <div class="content">
+    <a href="/" aria-label="K-SAT"><img src="brand_assets/logo-K-Sat.png" alt="K-SAT" class="logo"></a>
+
+    <div class="code-block">
+      <span class="dot"></span>
+      <span>STATUS · 404 · NOT_FOUND</span>
+    </div>
+
+    <div class="four-zero-four">404</div>
+
+    <h1>Cette page a quitté le pipeline.</h1>
+    <p>L'adresse demandée n'existe plus, n'a jamais existé, ou attend toujours sa phase de production. Reprenons depuis le brief.</p>
+
+    <div class="cta-row">
+      <a href="/" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Retour à l'accueil
+      </a>
+      <a href="/#contact" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="9" rx="1" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 4L7 8L12.5 4" stroke="currentColor" stroke-width="1.4"/></svg>
+        Contact
+      </a>
+    </div>
+
+    <div class="quick-links">
+      <a href="/#studio">Studio</a><span>·</span>
+      <a href="/#sectors">Secteurs</a><span>·</span>
+      <a href="/#pipeline">Pipeline</a><span>·</span>
+      <a href="/#work">Réalisations</a><span>·</span>
+      <a href="/#faq">FAQ</a>
+    </div>
+  </div>
+
+</body>
+</html>
