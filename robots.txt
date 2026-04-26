@@ -1,0 +1,13 @@
+# K-SAT AI Agency · robots.txt
+# Last updated: 2026-04-26
+
+User-agent: *
+Allow: /
+Disallow: /node_modules/
+Disallow: /temporary screenshots/
+Disallow: /screenshot*.mjs
+Disallow: /serve.mjs
+Disallow: /capture-sections.mjs
+
+# Sitemap
+Sitemap: https://k-sat.be/sitemap.xml
