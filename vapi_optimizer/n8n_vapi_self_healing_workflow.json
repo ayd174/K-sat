@@ -1,0 +1,717 @@
+{
+  "name": "VAPI Self-Healing & Continuous Optimization",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-self-healing-intake",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "11111111-1111-1111-1111-000000000001",
+      "name": "VAPI End-of-Call Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1860, 320],
+      "webhookId": "vapi-self-healing-intake-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalise the VAPI end-of-call-report payload.\n// VAPI wraps the actual event under .message in modern versions.\nconst payload = $input.first().json;\nconst body    = payload.body || payload;\nconst message = body.message || body;\n\nconst callId       = message.call?.id\n                  || message.callId\n                  || message.id\n                  || `unknown-${Date.now()}`;\nconst assistantId  = message.assistant?.id\n                  || message.assistantId\n                  || message.call?.assistantId\n                  || 'unknown';\nconst transcript   = message.transcript\n                  || message.artifact?.transcript\n                  || '';\nconst summary      = message.summary\n                  || message.analysis?.summary\n                  || '';\nconst duration     = Number(message.durationSeconds\n                  || message.call?.duration\n                  || message.artifact?.callDuration\n                  || 0);\nconst endedReason  = message.endedReason || message.call?.endedReason || '';\n\n// Tool calls live either at top level or scattered through artifact.messages.\nlet toolCalls = message.toolCalls || message.artifact?.toolCalls || [];\nif (!toolCalls.length && Array.isArray(message.artifact?.messages)) {\n  toolCalls = message.artifact.messages\n    .filter(m => Array.isArray(m.toolCalls) && m.toolCalls.length)\n    .flatMap(m => m.toolCalls);\n}\n\nreturn [{\n  json: {\n    call_id:     callId,\n    assistant_id: assistantId,\n    transcript,\n    summary,\n    duration,\n    ended_reason: endedReason,\n    tool_calls:  toolCalls,\n    success_evaluation: message.analysis?.successEvaluation ?? null,\n    raw_payload: message\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-000000000002",
+      "name": "Extract Call Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1640, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the body for the Analyzer LLM (Anthropic Messages API).\nconst d = $json;\n\nconst systemPrompt = [\n  'You are a senior QA reviewer for the AYKA Transport voice assistant (carpet, upholstery and curtain cleaning logistics in Brussels).',\n  'Analyze this call transcript. Did the assistant follow logistics protocols? Did it hallucinate? Extract a concise list of errors/friction points.',\n  '',\n  'Logistics protocols you must check (non-exhaustive):',\n  '- Never invent a name (only \"Ayka Tapis\"; never \"Redeka\", \"Aikatapi\", etc.).',\n  '- Never give a precise pickup hour window — only the day. Hour windows are forbidden.',\n  '- Never round square metres. Multiply width × length exactly.',\n  '- Always ask for the postal code / commune before quoting a total (delivery zone A/B/C).',\n  '- Never claim \"we only clean carpets\" — sofas, mattresses and curtains are also offered.',\n  '- Numbers and prices must be spoken in words, not digits.',\n  '- Tool failures, premature endCall, or stuck silences count as errors.',\n  '',\n  'Return STRICT JSON only — no prose, no markdown fences. Schema:',\n  '{',\n  '  \"success_score\": <float 0..1>,',\n  '  \"summary\": \"<one short sentence>\",',\n  '  \"errors\": [',\n  '    { \"type\": \"<short snake_case key>\", \"severity\": \"low|medium|high|critical\", \"description\": \"<what went wrong>\", \"evidence\": \"<verbatim quote or tool-call slice>\" }',\n  '  ],',\n  '  \"protocol_violations\": [\"<short tag>\"],',\n  '  \"hallucinations\": [\"<short tag>\"]',\n  '}'\n].join('\\n');\n\nconst userMessage = [\n  `Call ID: ${d.call_id}`,\n  `Assistant ID: ${d.assistant_id}`,\n  `Duration: ${d.duration}s`,\n  `Ended reason: ${d.ended_reason}`,\n  `VAPI success evaluation: ${JSON.stringify(d.success_evaluation)}`,\n  '',\n  '--- TRANSCRIPT ---',\n  String(d.transcript || '').slice(0, 12000),\n  '',\n  '--- TOOL CALLS ---',\n  JSON.stringify(d.tool_calls || [], null, 2).slice(0, 4000),\n  '',\n  '--- VAPI SUMMARY ---',\n  String(d.summary || '').slice(0, 2000)\n].join('\\n');\n\nreturn [{\n  json: {\n    ...d,\n    analyzer_body: {\n      model:      'claude-haiku-4-5',\n      max_tokens: 2048,\n      system:     systemPrompt,\n      messages:   [ { role: 'user', content: userMessage } ]\n    }\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-000000000003",
+      "name": "Build Analyzer Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1420, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key",         "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type",      "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.analyzer_body) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "neverError": false,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "11111111-1111-1111-1111-000000000004",
+      "name": "Analyzer LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1200, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse JSON out of the Anthropic response and merge with upstream call data.\nconst resp     = $json;\nconst upstream = $('Extract Call Data').first().json;\n\nconst raw = resp?.content?.[0]?.text || '';\nlet analysis = {};\ntry {\n  // Strip code fences if the model added them, then grab the outermost {...}.\n  const cleaned = raw.replace(/```(?:json)?/g, '').trim();\n  const match   = cleaned.match(/\\{[\\s\\S]*\\}/);\n  analysis      = match ? JSON.parse(match[0]) : {};\n} catch (e) {\n  analysis = { errors: [], success_score: null, parse_error: e.message, raw };\n}\n\nconst errors = Array.isArray(analysis.errors) ? analysis.errors : [];\nconst score  = typeof analysis.success_score === 'number' ? analysis.success_score : null;\n\nconst hasHigh   = errors.some(e => ['critical','high'].includes(String(e.severity || '').toLowerCase()));\nconst lowScore  = score !== null && score < 0.5;\nconst many      = errors.length >= 2;\nconst isCritical = hasHigh || lowScore;\nconst shouldOptimize = isCritical || many;\n\nreturn [{\n  json: {\n    ...upstream,\n    detected_errors:   errors,\n    success_score:     score,\n    is_critical:       isCritical,\n    should_optimize:   shouldOptimize,\n    analysis_summary:  analysis.summary || null,\n    full_analysis:     analysis\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-000000000005",
+      "name": "Parse Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-980, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Stage the row that will be inserted into vapi_call_logs.\nconst d = $json;\nreturn [{\n  json: {\n    ...d,\n    call_log_row: {\n      call_id:           d.call_id,\n      assistant_id:      d.assistant_id,\n      transcript:        d.transcript,\n      summary:           d.summary,\n      duration:          d.duration,\n      ended_reason:      d.ended_reason,\n      tool_calls:        d.tool_calls,\n      success_score:     d.success_score,\n      detected_errors:   d.detected_errors,\n      is_critical:       d.is_critical,\n      analysis_summary:  d.analysis_summary,\n      raw_payload:       d.raw_payload\n    }\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-000000000006",
+      "name": "Stage Call Log Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-760, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vapi_call_logs?on_conflict=call_id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "resolution=merge-duplicates,return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.call_log_row) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "11111111-1111-1111-1111-000000000007",
+      "name": "Insert vapi_call_logs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-540, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-should-optimize",
+              "leftValue": "={{ $('Parse Analysis').item.json.should_optimize }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "11111111-1111-1111-1111-000000000008",
+      "name": "Optimize?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-320, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.vapi.ai/assistant/{{ $('Parse Analysis').item.json.assistant_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.VAPI_PRIVATE_KEY }}" },
+            { "name": "User-Agent",    "value": "curl/8.0.0" }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "11111111-1111-1111-1111-000000000009",
+      "name": "Get Current VAPI Assistant",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-100, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the body for the Optimizer LLM.\nconst assistant = $json;\nconst call      = $('Parse Analysis').item.json;\n\nconst messages   = assistant?.model?.messages || [];\nconst sysMsg     = messages.find(m => (m.role || '').toLowerCase() === 'system');\nconst oldPrompt  = sysMsg?.content || '';\n\nconst systemPrompt = [\n  'You are a senior prompt engineer for production voice assistants.',\n  'Given the current VAPI system prompt and the recent user friction/errors, rewrite the system prompt to explicitly prevent these specific errors from happening again.',\n  '',\n  'Hard rules:',\n  '1. Preserve every existing capability, language section, pricing table and zone rule unless an error directly demands a change.',\n  '2. Make changes minimal, additive and surgical — do NOT rewrite the whole prompt.',\n  '3. Add explicit FORBIDDEN/CORRECT example pairs for each error type so the LLM has concrete patterns to avoid.',\n  '4. Never change tool definitions, voice IDs or model parameters.',\n  '5. Keep the language and tone consistent with the original (FR/NL/EN/TR sections must remain in their language).',\n  '',\n  'Return STRICT JSON only — no prose, no markdown fences. Schema:',\n  '{',\n  '  \"new_prompt\": \"<full rewritten system prompt, ready to ship>\",',\n  '  \"change_summary\": \"<2-4 bullets describing what you changed and why>\",',\n  '  \"diff_targets\": [\"<short tag for each error addressed>\"]',\n  '}'\n].join('\\n');\n\nconst userMessage = [\n  '## CURRENT SYSTEM PROMPT',\n  '```',\n  oldPrompt,\n  '```',\n  '',\n  '## DETECTED ERRORS (from this call)',\n  JSON.stringify(call.detected_errors || [], null, 2),\n  '',\n  '## ANALYSIS SUMMARY',\n  call.analysis_summary || '(none)',\n  '',\n  '## TRANSCRIPT EXCERPT (last 2000 chars)',\n  String(call.transcript || '').slice(-2000),\n  '',\n  'Rewrite the system prompt to prevent these errors. Return JSON only.'\n].join('\\n');\n\nreturn [{\n  json: {\n    assistant_id:   call.assistant_id,\n    call_id:        call.call_id,\n    old_prompt:     oldPrompt,\n    detected_errors: call.detected_errors,\n    optimizer_body: {\n      model:      'claude-opus-4-7',\n      max_tokens: 8192,\n      system:     systemPrompt,\n      messages:   [ { role: 'user', content: userMessage } ]\n    }\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-00000000000a",
+      "name": "Build Optimizer Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [120, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key",         "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type",      "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.optimizer_body) }}",
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "neverError": false,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "11111111-1111-1111-1111-00000000000b",
+      "name": "Optimizer LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [340, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the optimizer output and prepare the prompt-history row.\nconst crypto   = require('crypto');\nconst resp     = $json;\nconst ctx      = $('Build Optimizer Body').item.json;\n\nconst raw = resp?.content?.[0]?.text || '';\nlet result = {};\ntry {\n  const cleaned = raw.replace(/```(?:json)?/g, '').trim();\n  const match   = cleaned.match(/\\{[\\s\\S]*\\}/);\n  result        = match ? JSON.parse(match[0]) : {};\n} catch (e) {\n  result = { new_prompt: null, change_summary: null, parse_error: e.message, raw };\n}\n\nif (!result.new_prompt || result.new_prompt.length < 200) {\n  // Fail soft — surface error to admin instead of breaking the workflow.\n  result.parse_error = result.parse_error\n    || 'Optimizer returned an empty or implausibly short prompt.';\n}\n\nconst token = crypto.randomUUID();\n\nreturn [{\n  json: {\n    ...ctx,\n    new_prompt:        result.new_prompt || '',\n    change_summary:    result.change_summary || '(no summary returned)',\n    diff_targets:      result.diff_targets || [],\n    parse_error:       result.parse_error || null,\n    approval_token:    token,\n    history_row: {\n      assistant_id:        ctx.assistant_id,\n      old_prompt:          ctx.old_prompt,\n      new_prompt:          result.new_prompt || '',\n      reason_for_update:   result.change_summary || 'auto-generated optimization',\n      detected_errors:     ctx.detected_errors,\n      triggering_call_id:  ctx.call_id,\n      approval_token:      token,\n      status:              'pending'\n    }\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-00000000000c",
+      "name": "Parse Optimizer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [560, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vapi_prompt_history",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.history_row) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "11111111-1111-1111-1111-00000000000d",
+      "name": "Insert vapi_prompt_history",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [780, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compose the WhatsApp text for the admin and the Evolution API body.\nconst d           = $('Parse Optimizer').item.json;\nconst baseUrl     = $env.PUBLIC_N8N_BASE_URL || 'https://n8n.k-sat.tech';\nconst approveUrl  = `${baseUrl}/webhook/vapi-self-healing-approve?token=${encodeURIComponent(d.approval_token)}&action=approve`;\nconst rejectUrl   = `${baseUrl}/webhook/vapi-self-healing-approve?token=${encodeURIComponent(d.approval_token)}&action=reject`;\n\nconst errorsTxt = (d.detected_errors || [])\n  .slice(0, 6)\n  .map((e, i) => `${i + 1}. [${(e.severity || '?').toUpperCase()}] ${e.type || '?'}: ${e.description || ''}`)\n  .join('\\n');\n\nconst diffSize = (d.new_prompt || '').length - (d.old_prompt || '').length;\n\nconst text = [\n  '🛠️ *VAPI Auto-Optimizer*',\n  '',\n  `Assistant: \\`${d.assistant_id}\\``,\n  `Call: \\`${d.call_id}\\``,\n  `Prompt size: ${d.old_prompt?.length || 0} → ${d.new_prompt?.length || 0} chars (${diffSize >= 0 ? '+' : ''}${diffSize})`,\n  '',\n  '*Errors detected:*',\n  errorsTxt || '_(none parsed)_',\n  '',\n  '*Proposed change:*',\n  String(d.change_summary || '').slice(0, 800),\n  '',\n  d.parse_error ? `⚠️ Parser warning: ${d.parse_error}` : '',\n  '',\n  `✅ APPROVE: ${approveUrl}`,\n  `❌ REJECT:  ${rejectUrl}`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    ...d,\n    evolution_body: {\n      number: $env.ADMIN_WHATSAPP_NUMBER,\n      text\n    }\n  }\n}];"
+      },
+      "id": "11111111-1111-1111-1111-00000000000e",
+      "name": "Build Admin Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",       "value": "={{ $env.EVOLUTION_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.evolution_body) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "11111111-1111-1111-1111-00000000000f",
+      "name": "Notify Admin (WhatsApp)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1220, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, status: 'analyzed_and_proposed', call_id: $('Parse Analysis').item.json.call_id, approval_token: $('Parse Optimizer').item.json.approval_token }) }}",
+        "options": {}
+      },
+      "id": "11111111-1111-1111-1111-000000000010",
+      "name": "Respond — Optimization Proposed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1440, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, status: 'analyzed_no_action', call_id: $('Parse Analysis').item.json.call_id, errors: $('Parse Analysis').item.json.detected_errors.length }) }}",
+        "options": {}
+      },
+      "id": "11111111-1111-1111-1111-000000000011",
+      "name": "Respond — No Action Needed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-100, 460]
+    },
+
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "vapi-self-healing-approve",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "22222222-2222-2222-2222-000000000001",
+      "name": "Approval Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1860, 1080],
+      "webhookId": "vapi-self-healing-approve-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull token + action from the query string and validate shape.\nconst q      = $json.query || {};\nconst token  = String(q.token  || '').trim();\nconst action = String(q.action || '').trim().toLowerCase();\n\nif (!token) {\n  throw new Error('Missing token');\n}\nif (!['approve', 'reject'].includes(action)) {\n  throw new Error(`Invalid action: ${action}`);\n}\n\nreturn [{ json: { approval_token: token, action } }];"
+      },
+      "id": "22222222-2222-2222-2222-000000000002",
+      "name": "Validate Approval Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1640, 1080]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vapi_prompt_history",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "select",         "value": "id,assistant_id,old_prompt,new_prompt,status,approval_token,triggering_call_id" },
+            { "name": "approval_token", "value": "=eq.{{ $json.approval_token }}" },
+            { "name": "limit",          "value": "1" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Accept",        "value": "application/json" }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "22222222-2222-2222-2222-000000000003",
+      "name": "Fetch Pending Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1420, 1080]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide branch: approve | reject | already_handled | not_found.\nconst rows   = Array.isArray($json) ? $json : ($json.body || []);\nconst row    = rows[0];\nconst action = $('Validate Approval Input').item.json.action;\n\nif (!row) {\n  return [{ json: { branch: 'not_found', action } }];\n}\nif (row.status !== 'pending') {\n  return [{ json: { branch: 'already_handled', action, history: row } }];\n}\nreturn [{\n  json: {\n    branch: action,\n    action,\n    history: row,\n    approval_token: row.approval_token\n  }\n}];"
+      },
+      "id": "22222222-2222-2222-2222-000000000004",
+      "name": "Resolve Branch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1200, 1080]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue":  "={{ $json.branch }}",
+                    "rightValue": "approve",
+                    "operator":   { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey":    "approve"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue":  "={{ $json.branch }}",
+                    "rightValue": "reject",
+                    "operator":   { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey":    "reject"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue":  "={{ $json.branch }}",
+                    "rightValue": "already_handled",
+                    "operator":   { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey":    "already_handled"
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra", "renameFallbackOutput": "not_found" }
+      },
+      "id": "22222222-2222-2222-2222-000000000005",
+      "name": "Switch Branch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-980, 1080]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.vapi.ai/assistant/{{ $json.history.assistant_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.VAPI_PRIVATE_KEY }}" },
+            { "name": "User-Agent",    "value": "curl/8.0.0" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "22222222-2222-2222-2222-000000000006",
+      "name": "Get Assistant For Patch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-760, 880]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the PATCH body — preserve provider/model/temperature, replace only the system message.\nconst assistant   = $json;\nconst hist        = $('Resolve Branch').item.json.history;\n\nconst oldModel    = assistant.model || {};\nconst oldMessages = Array.isArray(oldModel.messages) ? oldModel.messages : [];\n\n// Replace (or insert) the single system message; leave any other messages intact.\nconst newMessages = oldMessages.some(m => (m.role || '').toLowerCase() === 'system')\n  ? oldMessages.map(m =>\n      (m.role || '').toLowerCase() === 'system'\n        ? { ...m, content: hist.new_prompt }\n        : m)\n  : [{ role: 'system', content: hist.new_prompt }, ...oldMessages];\n\nreturn [{\n  json: {\n    history_id:    hist.id,\n    assistant_id:  hist.assistant_id,\n    patch_body:    {\n      model: { ...oldModel, messages: newMessages }\n    }\n  }\n}];"
+      },
+      "id": "22222222-2222-2222-2222-000000000007",
+      "name": "Build VAPI Patch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-540, 880]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.vapi.ai/assistant/{{ $json.assistant_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.VAPI_PRIVATE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "User-Agent",    "value": "curl/8.0.0" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.patch_body) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "22222222-2222-2222-2222-000000000008",
+      "name": "PATCH VAPI Assistant",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-320, 880]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vapi_prompt_history",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $('Build VAPI Patch').item.json.history_id }}" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'deployed', approved_at: new Date().toISOString(), deployed_at: new Date().toISOString() }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "22222222-2222-2222-2222-000000000009",
+      "name": "Mark Deployed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-100, 880]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html><head><meta charset='utf-8'><title>VAPI Optimizer — Deployed</title></head><body style='font-family:system-ui;padding:48px;background:#0b1020;color:#e6e9f5;'><h1 style='color:#34d399;'>✅ Prompt deployed</h1><p>Assistant <code>{{ $('Build VAPI Patch').item.json.assistant_id }}</code> updated successfully.</p><p style='color:#9aa3c7;'>You can close this tab.</p></body></html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "text/html; charset=utf-8" }
+            ]
+          }
+        }
+      },
+      "id": "22222222-2222-2222-2222-00000000000a",
+      "name": "Respond — Approved",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [120, 880]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/vapi_prompt_history",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "id", "value": "=eq.{{ $json.history.id }}" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'rejected', rejected_at: new Date().toISOString() }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "22222222-2222-2222-2222-00000000000b",
+      "name": "Mark Rejected",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-540, 1180]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html><head><meta charset='utf-8'><title>VAPI Optimizer — Rejected</title></head><body style='font-family:system-ui;padding:48px;background:#1a0f10;color:#f4e0e0;'><h1 style='color:#f87171;'>❌ Change rejected</h1><p>The proposed prompt was discarded. The live assistant was not modified.</p></body></html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "text/html; charset=utf-8" }
+            ]
+          }
+        }
+      },
+      "id": "22222222-2222-2222-2222-00000000000c",
+      "name": "Respond — Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-320, 1180]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html><head><meta charset='utf-8'><title>VAPI Optimizer — Already handled</title></head><body style='font-family:system-ui;padding:48px;background:#13151f;color:#e6e9f5;'><h1>ℹ️ Already handled</h1><p>This token was already <b>{{ $json.history.status }}</b>. No action taken.</p></body></html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "text/html; charset=utf-8" }
+            ]
+          }
+        }
+      },
+      "id": "22222222-2222-2222-2222-00000000000d",
+      "name": "Respond — Already Handled",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-760, 1280]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html><head><meta charset='utf-8'><title>VAPI Optimizer — Not found</title></head><body style='font-family:system-ui;padding:48px;background:#13151f;color:#e6e9f5;'><h1>🔍 Token not found</h1><p>This approval link is invalid or expired.</p></body></html>",
+        "options": {
+          "responseCode": 404,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "text/html; charset=utf-8" }
+            ]
+          }
+        }
+      },
+      "id": "22222222-2222-2222-2222-00000000000e",
+      "name": "Respond — Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-760, 1380]
+    }
+  ],
+  "connections": {
+    "VAPI End-of-Call Webhook": {
+      "main": [[{ "node": "Extract Call Data", "type": "main", "index": 0 }]]
+    },
+    "Extract Call Data": {
+      "main": [[{ "node": "Build Analyzer Body", "type": "main", "index": 0 }]]
+    },
+    "Build Analyzer Body": {
+      "main": [[{ "node": "Analyzer LLM", "type": "main", "index": 0 }]]
+    },
+    "Analyzer LLM": {
+      "main": [[{ "node": "Parse Analysis", "type": "main", "index": 0 }]]
+    },
+    "Parse Analysis": {
+      "main": [[{ "node": "Stage Call Log Row", "type": "main", "index": 0 }]]
+    },
+    "Stage Call Log Row": {
+      "main": [[{ "node": "Insert vapi_call_logs", "type": "main", "index": 0 }]]
+    },
+    "Insert vapi_call_logs": {
+      "main": [[{ "node": "Optimize?", "type": "main", "index": 0 }]]
+    },
+    "Optimize?": {
+      "main": [
+        [{ "node": "Get Current VAPI Assistant", "type": "main", "index": 0 }],
+        [{ "node": "Respond — No Action Needed", "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Current VAPI Assistant": {
+      "main": [[{ "node": "Build Optimizer Body", "type": "main", "index": 0 }]]
+    },
+    "Build Optimizer Body": {
+      "main": [[{ "node": "Optimizer LLM", "type": "main", "index": 0 }]]
+    },
+    "Optimizer LLM": {
+      "main": [[{ "node": "Parse Optimizer", "type": "main", "index": 0 }]]
+    },
+    "Parse Optimizer": {
+      "main": [[{ "node": "Insert vapi_prompt_history", "type": "main", "index": 0 }]]
+    },
+    "Insert vapi_prompt_history": {
+      "main": [[{ "node": "Build Admin Notification", "type": "main", "index": 0 }]]
+    },
+    "Build Admin Notification": {
+      "main": [[{ "node": "Notify Admin (WhatsApp)", "type": "main", "index": 0 }]]
+    },
+    "Notify Admin (WhatsApp)": {
+      "main": [[{ "node": "Respond — Optimization Proposed", "type": "main", "index": 0 }]]
+    },
+
+    "Approval Webhook": {
+      "main": [[{ "node": "Validate Approval Input", "type": "main", "index": 0 }]]
+    },
+    "Validate Approval Input": {
+      "main": [[{ "node": "Fetch Pending Prompt", "type": "main", "index": 0 }]]
+    },
+    "Fetch Pending Prompt": {
+      "main": [[{ "node": "Resolve Branch", "type": "main", "index": 0 }]]
+    },
+    "Resolve Branch": {
+      "main": [[{ "node": "Switch Branch", "type": "main", "index": 0 }]]
+    },
+    "Switch Branch": {
+      "main": [
+        [{ "node": "Get Assistant For Patch",      "type": "main", "index": 0 }],
+        [{ "node": "Mark Rejected",                "type": "main", "index": 0 }],
+        [{ "node": "Respond — Already Handled",    "type": "main", "index": 0 }],
+        [{ "node": "Respond — Not Found",          "type": "main", "index": 0 }]
+      ]
+    },
+    "Get Assistant For Patch": {
+      "main": [[{ "node": "Build VAPI Patch", "type": "main", "index": 0 }]]
+    },
+    "Build VAPI Patch": {
+      "main": [[{ "node": "PATCH VAPI Assistant", "type": "main", "index": 0 }]]
+    },
+    "PATCH VAPI Assistant": {
+      "main": [[{ "node": "Mark Deployed", "type": "main", "index": 0 }]]
+    },
+    "Mark Deployed": {
+      "main": [[{ "node": "Respond — Approved", "type": "main", "index": 0 }]]
+    },
+    "Mark Rejected": {
+      "main": [[{ "node": "Respond — Rejected", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "ayka" },
+    { "name": "vapi" },
+    { "name": "self-healing" }
+  ],
+  "triggerCount": 2,
+  "active": false,
+  "pinData": {},
+  "versionId": "1.0.0"
+}
