@@ -2,3 +2,6 @@ node_modules/
 temporary screenshots/
 .claude/
 *.log
+
+# Workflow JSON exports — contain API secrets, never commit
+workflows/
