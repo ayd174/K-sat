@@ -9,3 +9,7 @@ workflows/
 # Independent sub-projects with their own git repos and deploy pipelines
 Dashboard_SaaS/
 Driver_app/
+Workshop_app/
+
+# Operational tooling — n8n workflow snapshots + push scripts (credentials inside)
+PROMPT lar/_workflow_backups/
