@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Sat Platform — Kullanım Kılavuzu</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  .page {
+    width: 1080px;
+    margin: 0 auto;
+    background: #fff;
+  }
+
+  /* ═══════════ TOP COVER ═══════════ */
+  .cover {
+    background: linear-gradient(145deg, #0d1b3e 0%, #1e1b4b 50%, #0f172a 100%);
+    padding: 56px 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .cover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .cover-header img { height: 52px; }
+
+  .cover-badge {
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #c4b5fd;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .cover h1 {
+    font-size: 52px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .cover h1 span {
+    background: linear-gradient(135deg, #818cf8, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover-sub {
+    font-size: 18px;
+    color: #64748b;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .cover-pills {
+    display: flex;
+    gap: 12px;
+    position: relative;
+  }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pill.blue { background: rgba(59,130,246,0.2); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+  .pill.amber { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+  .pill.violet { background: rgba(139,92,246,0.2); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+
+  /* ═══════════ TOC ═══════════ */
+  .toc {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 28px 60px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .toc-label {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+  }
+
+  .toc-items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .toc-item.blue { background: #eff6ff; color: #3b82f6; }
+  .toc-item.amber { background: #fffbeb; color: #d97706; }
+  .toc-item.violet { background: #f5f3ff; color: #7c3aed; }
+  .toc-item.slate { background: #f1f5f9; color: #475569; }
+
+  /* ═══════════ SECTION SHARED ═══════════ */
+  .section { padding: 56px 60px; }
+  .section + .section { border-top: 1px solid #f1f5f9; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .section-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .section-icon.blue { background: #eff6ff; }
+  .section-icon.amber { background: #fffbeb; }
+  .section-icon.violet { background: #f5f3ff; }
+
+  .section-header-text h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 2px;
+  }
+
+  .section-header-text p {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .section-badge {
+    margin-left: auto;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .section-badge.blue { background: #eff6ff; color: #3b82f6; }
+  .section-badge.amber { background: #fffbeb; color: #d97706; }
+  .section-badge.violet { background: #f5f3ff; color: #7c3aed; }
+
+  /* ═══════════ WORKFLOW STEPS ═══════════ */
+  .workflow-title {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 36px;
+    position: relative;
+  }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 40px;
+    bottom: 40px;
+    width: 2px;
+    background: linear-gradient(180deg, #e2e8f0, #e2e8f0);
+  }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 16px 0;
+    position: relative;
+  }
+
+  .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-num.blue { background: #3b82f6; color: #fff; }
+  .step-num.amber { background: #f59e0b; color: #fff; }
+  .step-num.violet { background: #7c3aed; color: #fff; }
+
+  .step-body {
+    flex: 1;
+    padding-top: 8px;
+  }
+
+  .step-body h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .step-body p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+  }
+
+  .step-body .note {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  /* ═══════════ FEATURES LIST ═══════════ */
+  .features-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+  }
+
+  .feature-row .ico { font-size: 20px; line-height: 1; }
+
+  .feature-row-text h5 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 2px;
+  }
+
+  .feature-row-text p {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  /* ═══════════ STATUS FLOW ═══════════ */
+  .status-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 36px;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+
+  .status-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .status-circle {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border: 2px solid;
+  }
+
+  .status-circle.gray { background: #f1f5f9; border-color: #cbd5e1; }
+  .status-circle.blue { background: #eff6ff; border-color: #3b82f6; }
+  .status-circle.amber { background: #fffbeb; border-color: #f59e0b; }
+  .status-circle.cyan { background: #ecfeff; border-color: #06b6d4; }
+  .status-circle.yellow { background: #fefce8; border-color: #eab308; }
+  .status-circle.green { background: #f0fdf4; border-color: #22c55e; }
+  .status-circle.emerald { background: #ecfdf5; border-color: #10b981; }
+
+  .status-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    text-align: center;
+    max-width: 60px;
+    line-height: 1.2;
+  }
+
+  .status-arrow {
+    width: 28px;
+    text-align: center;
+    color: #cbd5e1;
+    font-size: 16px;
+    flex-shrink: 0;
+    padding-bottom: 20px;
+  }
+
+  /* ═══════════ SCREEN MOCKUP ═══════════ */
+  .mockup-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .mockup-row.col2 { grid-template-columns: 1fr 1fr; }
+  .mockup-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .mockup-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+
+  .mockup-titlebar {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mockup-titlebar.blue { background: #3b82f6; }
+  .mockup-titlebar.amber { background: #f59e0b; }
+  .mockup-titlebar.violet { background: #7c3aed; }
+  .mockup-titlebar.green { background: #22c55e; }
+  .mockup-titlebar.slate { background: #475569; }
+
+  .mockup-titlebar .dots { display: flex; gap: 5px; }
+  .mockup-titlebar .dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.4); }
+
+  .mockup-titlebar .title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    margin-left: 4px;
+  }
+
+  .mockup-body {
+    background: #f8fafc;
+    padding: 16px;
+    min-height: 120px;
+  }
+
+  .mockup-row-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 6px;
+  }
+
+  .mockup-row-item .circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .mockup-row-item .lines { flex: 1; }
+  .mockup-row-item .line-a {
+    height: 8px; width: 70%;
+    background: #e2e8f0;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .mockup-row-item .line-b {
+    height: 6px; width: 45%;
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  .mockup-row-item .badge-sm {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+
+  /* ═══════════ TIP BOX ═══════════ */
+  .tip-box {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  .tip-box.blue { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .tip-box.amber { background: #fffbeb; border: 1px solid #fde68a; }
+  .tip-box.green { background: #f0fdf4; border: 1px solid #bbf7d0; }
+
+  .tip-box .tip-icon { font-size: 18px; flex-shrink: 0; }
+
+  .tip-box p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .tip-box.blue p { color: #1d4ed8; }
+  .tip-box.amber p { color: #92400e; }
+  .tip-box.green p { color: #166534; }
+
+  .tip-box p strong { font-weight: 700; }
+
+  /* ═══════════ QUICK REF ═══════════ */
+  .quick-ref {
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    padding: 48px 60px;
+    color: #fff;
+  }
+
+  .quick-ref h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+
+  .quick-ref .sub {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 32px;
+  }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .qr-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .qr-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .qr-list { list-style: none; }
+
+  .qr-list li {
+    font-size: 12px;
+    color: #64748b;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  .qr-list li::before {
+    content: '→';
+    color: #475569;
+    font-size: 11px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .qr-list li:last-child { border-bottom: none; }
+
+  /* ═══════════ FOOTER ═══════════ */
+  .footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 20px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer img { height: 24px; opacity: 0.5; }
+
+  .footer-center {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  /* ═══════════ DIVIDER ═══════════ */
+  .section-divider {
+    height: 4px;
+    background: linear-gradient(90deg, var(--c1), var(--c2));
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-header">
+      <img src="../Dashboard_SaaS/public/logo-K-Sat_(1).png" alt="K-Sat Logo" />
+      <div class="cover-badge">KULLANIM KILAVUZU v1.0</div>
+    </div>
+    <h1>K-Sat Lojistik<br><span>Platform Kılavuzu</span></h1>
+    <p class="cover-sub">Dashboard · Atölye Uygulaması · Sürücü Uygulaması</p>
+    <div class="cover-pills">
+      <div class="pill blue">🖥️ Dashboard SaaS</div>
+      <div class="pill amber">🧹 Atölye Uygulaması</div>
+      <div class="pill violet">🚚 Sürücü Uygulaması</div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <span class="toc-label">İçindekiler</span>
+    <div class="toc-items">
+      <a class="toc-item blue" href="#dashboard">🖥️ Bölüm 1 — Dashboard</a>
+      <a class="toc-item amber" href="#workshop">🧹 Bölüm 2 — Atölye Uygulaması</a>
+      <a class="toc-item violet" href="#driver">🚚 Bölüm 3 — Sürücü Uygulaması</a>
+      <a class="toc-item slate" href="#quickref">📋 Hızlı Başvuru</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       BÖLÜM 1 — DASHBOARD
+  ══════════════════════════════════════════ -->
+  <div class="section-divider" style="--c1:#3b82f6; --c2:#6366f1;"></div>
+  <div class="section" id="dashboard">
+
+    <div class="section-header">
+      <div class="section-icon blue">🖥️</div>
+      <div class="section-header-text">
+        <h2>Dashboard SaaS</h2>
+        <p>Yönetim merkezi — Siparişler, müşteriler, sürücüler, rotalar ve raporlar</p>
+      </div>
+      <span class="section-badge blue">Yönetici Ekranı</span>
+    </div>
+
+    <!-- Sipariş akışı -->
+    <div class="workflow-title">Sipariş Durum Akışı</div>
+    <div class="status-flow">
+      <div class="status-node">
+        <div class="status-circle gray">🆕</div>
+        <div class="status-label">Yeni</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle blue">🚛</div>
+        <div class="status-label">Teslim Alındı</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle amber">🏭</div>
+        <div class="status-label">Atölyede</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle cyan">💧</div>
+        <div class="status-label">Yıkamada</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle yellow">☀️</div>
+        <div class="status-label">Kurutmada</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle green">✅</div>
+        <div class="status-label">Hazır</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle blue">📦</div>
+        <div class="status-label">Teslimat Yolunda</div>
+      </div>
+      <div class="status-arrow">→</div>
+      <div class="status-node">
+        <div class="status-circle emerald">🎉</div>
+        <div class="status-label">Teslim Edildi</div>
+      </div>
+    </div>
+
+    <!-- Adımlar -->
+    <div class="workflow-title">Temel İş Akışları</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:12px;">📦 Yeni Sipariş Oluşturma</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num blue">1</div>
+            <div class="step-body">
+              <h4>Siparişler → Yeni Sipariş</h4>
+              <p>Müşteri adı, telefon ve alış adresini girin.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">2</div>
+            <div class="step-body">
+              <h4>Tarih ve Halı Tipi</h4>
+              <p>Alış/teslimat tarihi, halı tipi ve m² girin. Fiyat otomatik hesaplanır.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">3</div>
+            <div class="step-body">
+              <h4>Ödeme Durumu</h4>
+              <p>Beklemede / Ödendi / İade seçin. Sipariş ORD-0000 formatında kaydedilir.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#6366f1;margin-bottom:12px;">🗺️ Rota Oluşturma</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num blue">1</div>
+            <div class="step-body">
+              <h4>Rotalar → Yeni Rota</h4>
+              <p>Rota tipi seçin: Alış (turuncu) veya Teslimat (yeşil).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">2</div>
+            <div class="step-body">
+              <h4>Sürücü & Tarih Seçimi</h4>
+              <p>Sürücüyü, tarihi ve depo çıkış adresini belirleyin.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num blue">3</div>
+            <div class="step-body">
+              <h4>Rota Oluştur</h4>
+              <p>N8N ile rota otomatik optimize edilir. Sürücüye anında iletilir.</p>
+              <span class="note">⚡ Sürücü uygulamasında otomatik görünür</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features 2col -->
+    <div class="workflow-title">Diğer Özellikler</div>
+    <div class="features-2col">
+      <div class="feature-row">
+        <div class="ico">👥</div>
+        <div class="feature-row-text">
+          <h5>Müşteri Yönetimi (CRM)</h5>
+          <p>Müşteri kayıt, arama, sipariş geçmişi ve iletişim bilgileri takibi.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="ico">🚗</div>
+        <div class="feature-row-text">
+          <h5>Sürücü Yönetimi</h5>
+          <p>Sürücü kaydı, aktif/pasif durumu ve günlük performans takibi.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="ico">💬</div>
+        <div class="feature-row-text">
+          <h5>İletişim Merkezi</h5>
+          <p>Toplu veya tekil WhatsApp mesajı, e-posta ve fotoğraf gönderimi.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="ico">📊</div>
+        <div class="feature-row-text">
+          <h5>Raporlar</h5>
+          <p>Sürücü ve atölye bazlı halı adeti, teslim sayısı ve alınan ödeme raporları.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="ico">📞</div>
+        <div class="feature-row-text">
+          <h5>Sesli Asistan (VAPI)</h5>
+          <p>Müşterileri otomatik aramayla bilgilendirin. Arama özetleri kayıt altına alınır.</p>
+        </div>
+      </div>
+      <div class="feature-row">
+        <div class="ico">⚙️</div>
+        <div class="feature-row-text">
+          <h5>Ayarlar & Entegrasyon</h5>
+          <p>Halı tipleri, fiyatlandırma, webhook URL'leri ve bildirim kanalı yapılandırması.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box blue">
+      <div class="tip-icon">💡</div>
+      <p><strong>İpucu:</strong> Toplu durum güncellemesi için Siparişler sayfasında birden fazla siparişi işaretleyip "Taşı" dropdown'undan hedef durumu seçin. Çok sayıda siparişi tek seferde güncelleyebilirsiniz.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       BÖLÜM 2 — ATÖLYE UYGULAMASI
+  ══════════════════════════════════════════ -->
+  <div class="section-divider" style="--c1:#f59e0b; --c2:#ef4444;"></div>
+  <div class="section" id="workshop">
+
+    <div class="section-header">
+      <div class="section-icon amber">🧹</div>
+      <div class="section-header-text">
+        <h2>Atölye Uygulaması</h2>
+        <p>Atölye personeli için — yıkama aşamaları, fotoğraf yükleme ve müşteri bildirimi</p>
+      </div>
+      <span class="section-badge amber">Atölye Personeli</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-bottom:36px;">
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:12px;">📥 Yeni Halı Kabul Kaydı</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num amber">1</div>
+            <div class="step-body">
+              <h4>+ Yeni Kayıt Butonuna Bas</h4>
+              <p>Sağ üst köşedeki mavi "+" butonuna tıkla.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">2</div>
+            <div class="step-body">
+              <h4>Müşteri Bilgilerini Gir</h4>
+              <p>Ad, telefon, halı adeti ve yolluk sayısını girin.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">3</div>
+            <div class="step-body">
+              <h4>Ödeme Durumunu Seç</h4>
+              <p>Teslimatta öde / Tam ödendi / Kapora. Nakit veya kart seç.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">4</div>
+            <div class="step-body">
+              <h4>Kaydet → WhatsApp veya Makbuz</h4>
+              <p>Onay ekranında müşteriye Fransızca WhatsApp bildirimi gönder veya makbuz bas.</p>
+              <span class="note">🖨️ ATL-0000 formatında otomatik sipariş no</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#d97706;margin-bottom:12px;">🔄 Yıkama Aşama Takibi</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num amber">1</div>
+            <div class="step-body">
+              <h4>Aktif Sekmesinde Siparişi Bul</h4>
+              <p>Atölyedeki tüm aktif siparişler bu sekmede görünür.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">2</div>
+            <div class="step-body">
+              <h4>Durum Butonu ile Aşama Geçişi</h4>
+              <p>Atölyede → Yıkamada → Kurutmada → Hazır sırasıyla ilerle.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">3</div>
+            <div class="step-body">
+              <h4>Önce / Sonra Fotoğraf Yükle</h4>
+              <p>📷 kamera ikonuna bas, önce ve sonra fotoğraf ekle.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num amber">4</div>
+            <div class="step-body">
+              <h4>Hasar Notu (Varsa)</h4>
+              <p>⚡ ikonuyla hasar fotoğrafı, 📝 ikonuyla hasar notu ekle.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen mockup -->
+    <div class="mockup-row col2">
+      <div class="mockup-card">
+        <div class="mockup-titlebar amber">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="title">🧹 Aktif Siparişler</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#fef3c7;">💧</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#ecfeff;color:#0891b2;">Yıkamada</span>
+          </div>
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#fef3c7;">☀️</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#fefce8;color:#ca8a04;">Kurutmada</span>
+          </div>
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#fef3c7;">🏭</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#fff7ed;color:#ea580c;">Atölyede</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mockup-titlebar green">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="title">✅ Onay Ekranı</span>
+        </div>
+        <div class="mockup-body">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:18px;">✓</span>
+              <span style="font-size:13px;font-weight:700;color:#166534;">Kayıt Tamamlandı</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;">💬 WhatsApp</button>
+              <button style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;">🖨️ Makbuz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box amber">
+      <div class="tip-icon">💡</div>
+      <p><strong>Toplu Güncelleme:</strong> Birden fazla siparişi aynı anda güncellemek için üst menüdeki katman ikonuna (<strong>≡</strong>) bas. Onay kutucuklarıyla siparişleri seç, toplu durum güncelle.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       BÖLÜM 3 — SÜRÜCÜ UYGULAMASI
+  ══════════════════════════════════════════ -->
+  <div class="section-divider" style="--c1:#7c3aed; --c2:#6366f1;"></div>
+  <div class="section" id="driver">
+
+    <div class="section-header">
+      <div class="section-icon violet">🚚</div>
+      <div class="section-header-text">
+        <h2>Sürücü Uygulaması</h2>
+        <p>Mobil uygulama — Günlük rota ve durak yönetimi (telefon uygulaması)</p>
+      </div>
+      <span class="section-badge violet">Sürücü Mobil</span>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-bottom:36px;">
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:12px;">🌅 Günlük Rota Başlatma</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num violet">1</div>
+            <div class="step-body">
+              <h4>Uygulamaya Giriş Yap</h4>
+              <p>E-posta ve şifreyle giriş yap. Dil seçimi sağ üstteki küre ikonundan.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num violet">2</div>
+            <div class="step-body">
+              <h4>Günün Rotasını Gör</h4>
+              <p>Bugüne atanmış duraklar otomatik yüklenir. Durak no, adres ve ETA görünür.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num violet">3</div>
+            <div class="step-body">
+              <h4>Rotayı Başlat</h4>
+              <p>Yeşil "Rotayı Başlat" butonuna bas. N8N ile ETA'lar hesaplanır.</p>
+              <span class="note">📍 Google Maps navigasyon otomatik açılır</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:12px;">📦 Durak Tamamlama</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num violet">1</div>
+            <div class="step-body">
+              <h4>Durağa Tıkla</h4>
+              <p>Listeden durağa tıkla. Müşteri adı, adres ve ETA detayları görünür.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num violet">2</div>
+            <div class="step-body">
+              <h4>Teslim Al veya Teslim Et</h4>
+              <p>Alış rotasında "Teslim Al", teslimat rotasında "Teslim Et" butonuna bas.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num violet">3</div>
+            <div class="step-body">
+              <h4>Sorun Varsa İptal Et</h4>
+              <p>Müşteri yok veya yanlış adres ise "İptal" seç, neden belirt.</p>
+              <span class="note">🔄 Dashboard'da anlık güncellenir</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Mockup -->
+    <div class="mockup-row col3">
+      <div class="mockup-card">
+        <div class="mockup-titlebar violet">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="title">📋 Durak Listesi</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#ede9fe;font-weight:700;font-size:11px;color:#7c3aed;">1</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#eff6ff;color:#3b82f6;">Alış</span>
+          </div>
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#ede9fe;font-weight:700;font-size:11px;color:#7c3aed;">2</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#fff7ed;color:#ea580c;">Teslimat</span>
+          </div>
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#ede9fe;font-weight:700;font-size:11px;color:#7c3aed;">3</div>
+            <div class="lines"><div class="line-a"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#eff6ff;color:#3b82f6;">Alış</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mockup-titlebar slate">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="title">📍 Durak Detayı</span>
+        </div>
+        <div class="mockup-body" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:12px;">
+            <div style="font-weight:700;color:#0f172a;margin-bottom:4px;">👤 Müşteri Adı</div>
+            <div style="color:#64748b;">📍 Sokak, No, Şehir</div>
+            <div style="color:#64748b;">🕐 ETA: 10:45</div>
+          </div>
+          <button style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;width:100%;">✅ Teslim Et</button>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mockup-titlebar green">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="title">✅ Tamamlananlar</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#f0fdf4;">✓</div>
+            <div class="lines"><div class="line-a" style="background:#bbf7d0;"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#dcfce7;color:#16a34a;">Tamamlandı</span>
+          </div>
+          <div class="mockup-row-item">
+            <div class="circle" style="background:#f0fdf4;">✓</div>
+            <div class="lines"><div class="line-a" style="background:#bbf7d0;"></div><div class="line-b"></div></div>
+            <span class="badge-sm" style="background:#dcfce7;color:#16a34a;">Tamamlandı</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box green">
+      <div class="tip-icon">💡</div>
+      <p><strong>Gerçek Zamanlı Senkronizasyon:</strong> Sürücü uygulaması Supabase ile anlık bağlantı kurar. Dashboard'dan yeni bir durak eklediğinizde, sürücünün telefonu otomatik güncellenir — sayfa yenilemeye gerek yoktur.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       HIZLI BAŞVURU
+  ══════════════════════════════════════════ -->
+  <div class="quick-ref" id="quickref">
+    <h2>📋 Hızlı Başvuru</h2>
+    <p class="sub">Sık yapılan işlemler ve kısa yollar</p>
+    <div class="qr-grid">
+      <div class="qr-card">
+        <h4>🖥️ Dashboard</h4>
+        <ul class="qr-list">
+          <li>Yeni sipariş: Siparişler → + Yeni Sipariş</li>
+          <li>Sipariş arama: Arama çubuğu veya durum filtresi</li>
+          <li>Toplu durum güncelleme: Onay kutuları → Taşı</li>
+          <li>Rota oluşturma: Rotalar → Yeni Rota Oluştur</li>
+          <li>WhatsApp gönder: İletişim → WhatsApp sekmesi</li>
+          <li>Raporları görüntüle: Raporlar → Sürücü / Atölye</li>
+          <li>Sürücü ekle: Sürücüler → Yeni Sürücü</li>
+          <li>Halı tipi ekle: Ayarlar → Halı Tipleri</li>
+        </ul>
+      </div>
+      <div class="qr-card">
+        <h4>🧹 Atölye Uygulaması</h4>
+        <ul class="qr-list">
+          <li>Yeni kabul kaydı: Üst sağdaki + butonu</li>
+          <li>Sipariş formatı: ATL-0000 (otomatik)</li>
+          <li>Durum geçişi: Sipariş kartındaki durum butonu</li>
+          <li>Fotoğraf yükle: 📷 kamera ikonuna bas</li>
+          <li>Hasar fotoğrafı: ⚡ ikon → anlık yükleme</li>
+          <li>WhatsApp (Fransızca): Onay ekranı → 💬 butonu</li>
+          <li>Makbuz bas: Onay ekranı → 🖨️ butonu</li>
+          <li>Toplu güncelleme: ≡ ikon → çoklu seçim</li>
+        </ul>
+      </div>
+      <div class="qr-card">
+        <h4>🚚 Sürücü Uygulaması</h4>
+        <ul class="qr-list">
+          <li>Giriş: E-posta + şifre (Dashboard'dan verilir)</li>
+          <li>Rota başlat: Yeşil "Rotayı Başlat" butonu</li>
+          <li>Navigasyon: Adrese tıkla → Google Maps açılır</li>
+          <li>Alış tamamla: Durak detay → Teslim Al</li>
+          <li>Teslimat tamamla: Durak detay → Teslim Et</li>
+          <li>Sorun bildir: Durak detay → İptal + Neden</li>
+          <li>Geçmiş görüntüle: Alt menü → Tamamlananlar</li>
+          <li>Dil değiştir: Sağ üst köre ikonu</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <img src="../Dashboard_SaaS/public/logo-K-Sat_(1).png" alt="K-Sat" />
+    <div class="footer-center">K-Sat Lojistik Platformu — Kullanım Kılavuzu v1.0 — 2025</div>
+    <div class="footer-right">🇧🇪 Belçika</div>
+  </div>
+
+</div>
+</body>
+</html>

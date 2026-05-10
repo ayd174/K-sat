@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Co-Branding Demo | Powered by K-SAT</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f111a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Arka plan neon efektleri */
+        .bg-glow-1 {
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 60%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .bg-glow-2 {
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* Ana Giriş Kutusu (Glassmorphism) */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            width: 400px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Müşteri Markası Alanı */
+        .client-brand {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .client-brand h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .client-brand p {
+            font-size: 14px;
+            color: #71717a;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        /* Giriş Formu Elementleri */
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-group input:focus {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        /* K-SAT Powered By İmzası */
+        .powered-by {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            cursor: default;
+        }
+
+        .powered-by:hover {
+            opacity: 1;
+        }
+
+        .powered-by span {
+            font-size: 12px;
+            color: #71717a;
+            font-weight: 400;
+        }
+
+        .ksat-img-logo {
+            height: 28px; /* Logoyu dengeli bir boyuta getiriyoruz */
+            object-fit: contain;
+            /* Logoyu tamamen beyaza çevirip karanlık arka planda net görünmesini sağlıyoruz */
+            filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+            transition: all 0.3s ease;
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        .powered-by:hover .ksat-img-logo {
+            filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(56, 189, 248, 1));
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse-glow {
+            from { filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(56, 189, 248, 0.5)); }
+            to { filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(139, 92, 246, 0.9)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <div class="login-container">
+        <!-- Müşterinin Kendi Markası -->
+        <div class="client-brand">
+            <h1>AYKA TAPIS</h1>
+            <p>Lojistik Yönetim Paneli</p>
+        </div>
+
+        <!-- Form -->
+        <div class="input-group">
+            <input type="text" placeholder="E-posta Adresi">
+        </div>
+        <div class="input-group">
+            <input type="password" placeholder="Şifre">
+        </div>
+        <button class="login-btn">Sisteme Giriş Yap</button>
+
+        <!-- K-SAT Co-branding İmzası -->
+        <div class="powered-by">
+            <span>Powered by</span>
+            <img src="../../assets/K-Sat%20Logo.png" alt="K-SAT Logo" class="ksat-img-logo">
+        </div>
+    </div>
+</body>
+</html>
