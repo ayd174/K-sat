@@ -5,3 +5,7 @@ temporary screenshots/
 
 # Workflow JSON exports — contain API secrets, never commit
 workflows/
+
+# Independent sub-projects with their own git repos and deploy pipelines
+Dashboard_SaaS/
+Driver_app/
