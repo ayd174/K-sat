@@ -3,6 +3,11 @@ temporary screenshots/
 .claude/
 *.log
 
+# Master environment — Single Source of Truth (never commit)
+.env
+.env.*
+!.env.example
+
 # Workflow JSON exports — contain API secrets, never commit
 workflows/
 
@@ -12,4 +17,15 @@ Driver_app/
 Workshop_app/
 
 # Operational tooling — n8n workflow snapshots + push scripts (credentials inside)
-PROMPT lar/_workflow_backups/
+# Glob pattern (not directory) so specific files can be re-included below.
+PROMPT lar/_workflow_backups/*
+
+# Root-level operational backups — DB snapshots, recovery lists, customer PII
+/_workflow_backups/
+workflows/_workflow_backups/
+
+# Exceptions: source-bound build tooling (no credentials, no PII).
+# Must come AFTER directory-level rules above; parent dir is not excluded
+# (only its contents via glob), enabling re-inclusion.
+!PROMPT lar/_workflow_backups/build.py
+!PROMPT lar/_workflow_backups/whitelist_constants.py
