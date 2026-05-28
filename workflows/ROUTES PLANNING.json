@@ -1,0 +1,1527 @@
+{
+  "name": "ROUTES PLANNING",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'error', message: 'Invalid input: orders must be between 1-40 and driver_id is required' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "e570ec41-0ece-4156-81c7-b55253fed89f",
+      "name": "Respond - Validation Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -176,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'error', message: 'Route optimization failed: Google API returned no routes. Check addresses and try again.' }) }}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "id": "b38a1358-2ad4-4206-8c59-57d775b05892",
+      "name": "Respond - API Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        3136
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "route-planner",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ee85378f-d273-4a0e-9110-fd17a70ce990",
+      "name": "Receive Route Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1088,
+        2912
+      ],
+      "webhookId": "7bdb297a-abee-40b1-a75a-cad28f8e1ca1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "768abf58-1a44-4b5a-bc5f-8dcf3ca92afc",
+              "name": "driver_id",
+              "value": "={{ $json.body?.driver_id ?? $json.driver_id }}",
+              "type": "string"
+            },
+            {
+              "id": "65e55376-0daf-4d6a-948d-0987d923ea00",
+              "name": "company_id",
+              "value": "={{ $json.body?.company_id ?? $json.company_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a413d661-a4d2-4546-9466-73d131859cfe",
+              "name": "route_type",
+              "value": "={{ $json.body?.route_type ?? $json.route_type ?? 'pickup' }}",
+              "type": "string"
+            },
+            {
+              "id": "1d718e51-8864-4f3a-9e6d-8e153727e509",
+              "name": "depot_address",
+              "value": "={{ $json.body?.depot_address ?? $json.depot_address }}",
+              "type": "string"
+            },
+            {
+              "id": "18f44cf2-dee8-44e3-a7c4-4179bb9c3255",
+              "name": "departure_time",
+              "value": "={{ $json.body?.departure_time ?? $json.departure_time ?? '08:00' }}",
+              "type": "string"
+            },
+            {
+              "id": "084990f6-f889-4e88-8c37-3cbda1ed9ce1",
+              "name": "route_date",
+              "value": "={{ $json.body?.route_date ?? $json.route_date }}",
+              "type": "string"
+            },
+            {
+              "id": "f9a1c3d2-4e5b-6789-abcd-ef0123456789",
+              "name": "orders",
+              "value": "={{ $json.body?.orders ?? $json.orders ?? [] }}",
+              "type": "array"
+            },
+            {
+              "id": "lang-field-001",
+              "name": "language",
+              "value": "={{ ($json.body?.language ?? $json.language ?? 'FR').toUpperCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -864,
+        2912
+      ],
+      "id": "ff70b3c2-4388-47da-ab6b-98d8f9e5c47e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-4",
+              "name": "driver_id",
+              "value": "={{ $('Edit Fields').first().json.driver_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "customers_list",
+              "value": "={{ $('Edit Fields').first().json.orders.map(o => ({ order_id: o.id, customer_name: o.customer_name, customer_phone: o.customer_phone, address: o.address })) }}",
+              "type": "array"
+            },
+            {
+              "id": "id-6",
+              "name": "customer_count",
+              "value": "={{ ($('Edit Fields').first().json.orders || []).length }}",
+              "type": "number"
+            },
+            {
+              "id": "id-7",
+              "name": "depot_address",
+              "value": "={{ $('Edit Fields').first().json.depot_address }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "departure_time",
+              "value": "={{ $('Edit Fields').first().json.departure_time }}",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "route_date",
+              "value": "={{ $('Edit Fields').first().json.route_date }}",
+              "type": "string"
+            },
+            {
+              "id": "915b13e2-1624-46aa-9917-43c07daaaac5",
+              "name": "route_type",
+              "value": "={{ $('Edit Fields').item.json.route_type }}",
+              "type": "string"
+            },
+            {
+              "id": "2c64e1a4-49d0-46d9-b13f-3ba962c5501e",
+              "name": "company_id",
+              "value": "={{ $('Edit Fields').item.json.company_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ce4c2fe-cadb-42ee-bc92-7c8c54353717",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $('Workflow Configuration').item.json.customer_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $('Workflow Configuration').item.json.customer_count }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            },
+            {
+              "id": "id-3",
+              "leftValue": "={{ $json.driver_id }}\n",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9cd4ca95-24ed-48b1-96c8-ee3ac18cf7b4",
+      "name": "Validate Input Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        2912
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Invalid input: orders must be between 1-40 and driver_id is required"
+      },
+      "id": "bc5aab52-067d-4486-a709-20a6157117c2",
+      "name": "Error - Invalid Input",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        3168
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://routes.googleapis.com/directions/v2:computeRoutes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Goog-Api-Key",
+              "value": "AIzaSyBBCnzbOHnPrMPsuQl6KwZJzMNjKglna3E"
+            },
+            {
+              "name": "X-Goog-FieldMask",
+              "value": "routes.duration,routes.distanceMeters,routes.legs.duration,routes.legs.distanceMeters,routes.optimizedIntermediateWaypointIndex"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ \n{\n  \"origin\": { \n    \"address\": $node[\"Workflow Configuration\"].json.depot_address \n  },\n  \"destination\": { \n    \"address\": $node[\"Workflow Configuration\"].json.depot_address \n  },\n  \"intermediates\": $node[\"Workflow Configuration\"].json.customers_list.map(c => ({ \n    \"address\": c.address \n  })),\n  \"travelMode\": \"DRIVE\",\n  \"routingPreference\": \"TRAFFIC_AWARE\",\n  \"optimizeWaypointOrder\": !($node[\"Receive Route Request\"].json.body?.preserve_order),\n  \"computeAlternativeRoutes\": false,\n  \"routeModifiers\": { \n    \"avoidTolls\": false, \n    \"avoidHighways\": false, \n    \"avoidFerries\": false \n  },\n  \"languageCode\": \"fr-BE\",\n  \"units\": \"METRIC\"\n}\n}}",
+        "options": {}
+      },
+      "id": "f50a01ea-34c1-40a5-8285-180aa6a35686",
+      "name": "Google Routes API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -144,
+        2896
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.routes }}",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "id-2",
+              "leftValue": "={{ $json.routes[0] }}",
+              "operator": {
+                "type": "object",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bc5cd7fd-d642-4e54-8311-22ce7e38ed63",
+      "name": "Check API Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        2896
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "optimized_order",
+              "value": "={{ $json.routes[0].optimizedIntermediateWaypointIndex || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "id-2",
+              "name": "legs",
+              "value": "={{ $json.routes[0].legs || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "id-3",
+              "name": "total_distance",
+              "value": "={{ $json.routes[0].distanceMeters }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "total_duration",
+              "value": "={{ $json.routes[0].duration }}",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "route_type",
+              "value": "={{ $('Workflow Configuration').item.json.route_type }}",
+              "type": "string"
+            },
+            {
+              "id": "id-6",
+              "name": "driver_id",
+              "value": "={{ $('Workflow Configuration').item.json.driver_id }}",
+              "type": "string"
+            },
+            {
+              "id": "id-7",
+              "name": "route_date",
+              "value": "={{ $('Workflow Configuration').item.json.route_date }}",
+              "type": "string"
+            },
+            {
+              "id": "id-8",
+              "name": "departure_time",
+              "value": "={{ $('Workflow Configuration').item.json.departure_time }}",
+              "type": "string"
+            },
+            {
+              "id": "id-10",
+              "name": "depot_address",
+              "value": "={{ $('Workflow Configuration').item.json.depot_address }}",
+              "type": "string"
+            },
+            {
+              "id": "b4699e8c-ce51-4166-8372-db4164bbac68",
+              "name": "language",
+              "value": "={{ $('Receive Route Request').item.json.body.language }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a14e3661-7919-4b30-a776-33fc9e86e12e",
+      "name": "Parse Google Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst workflowConfig = $('Workflow Configuration').first().json;\nconst correctDriverId = workflowConfig.driver_id;\nconst optimizedOrder = data.optimized_order;\nconst legs = data.legs;\nconst routeDate = data.route_date || workflowConfig.route_date;\nconst departureTime = data.departure_time || workflowConfig.departure_time;\nconst customers = workflowConfig.customers_list;\n\n// ⏱️ Her durakta geçirilen süre (saniye cinsinden)\nconst SERVICE_TIME_SECONDS = 7 * 60; // 7 dakika\n\nconst timeParts = departureTime.split(':').map(Number);\nconst departureMinutes = timeParts[0] * 60 + timeParts[1];\n\nconst stops = [];\nlet cumulativeSeconds = 0;\n\nfor (let i = 0; i < legs.length; i++) {\n  const leg = legs[i];\n  const durationSeconds = parseInt(leg.duration.replace('s', ''), 10);\n  const distanceMeters = leg.distanceMeters || 0;\n  cumulativeSeconds += durationSeconds;\n\n  // Son leg (depoya dönüş) atla\n  if (i < legs.length - 1) {\n    const customerIndex = (optimizedOrder && optimizedOrder.length > 0) ? optimizedOrder[i] : i;\n    const customer = customers[customerIndex] || customers[i];\n    if (!customer) continue;\n\n    // ETA hesapla (bu durağa varış saati)\n    const etaTotalMinutes = departureMinutes + Math.round(cumulativeSeconds / 60);\n    const etaH = Math.floor(etaTotalMinutes / 60) % 24;\n    const etaM = etaTotalMinutes % 60;\n    const etaStr = routeDate + 'T' + String(etaH).padStart(2,'0') + ':' + String(etaM).padStart(2,'0') + ':00';\n\n    stops.push({\n      order_id: customer.order_id || null,\n      customer_name: customer.customer_name || null,\n      customer_phone: customer.customer_phone || null,\n      address: customer.address,\n      route_order: i + 1,\n      eta: etaStr,\n      estimated_duration: durationSeconds,\n      distance: distanceMeters,\n      driver_id: correctDriverId,\n      route_type: data.route_type || workflowConfig.route_type,\n      route_date: routeDate\n    });\n\n    // ✅ Bir sonraki durağın ETA'sı için servis süresini ekle\n    cumulativeSeconds += SERVICE_TIME_SECONDS;\n  }\n}\n\nreturn [{ json: {\n  stops,\n  total_distance: data.total_distance,\n  total_duration: data.total_duration,\n  driver_id: correctDriverId,\n  route_type: data.route_type || workflowConfig.route_type,\n  route_date: routeDate,\n  departure_time: departureTime\n} }];"
+      },
+      "id": "3c84ec78-7ca2-48c6-8fda-cf7807a0b4a7",
+      "name": "Calculate Stop ETAs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "totalDistance",
+              "value": "={{ Math.round($json.total_distance / 1000 * 10) / 10 }}",
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "totalDuration",
+              "value": "={{ Math.round(parseInt($json.total_duration.toString().replace('s','')) / 60) }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "stops",
+              "value": "={{ $json.stops.map(s => ({ orderId: s.order_id, order_id: s.order_id, estimatedArrival: s.eta.substring(11, 16), customer_name: s.customer_name, customer_phone: s.customer_phone, address: s.address })) }}",
+              "type": "array"
+            },
+            {
+              "id": "cc87d43c-c2d0-4084-b0b7-8d282701129e",
+              "name": "returnTime",
+              "value": "={{ (() => { const totalSec = parseInt($json.total_duration.toString().replace('s','')); const parts = $json.departure_time.split(':').map(Number); const h = parts[0]; const m = parts[1]; const totalMin = h * 60 + m + Math.round(totalSec / 60); const rh = Math.floor(totalMin / 60) % 24; const rm = totalMin % 60; return String(rh).padStart(2,'0') + ':' + String(rm).padStart(2,'0'); })() }}",
+              "type": "string"
+            },
+            {
+              "id": "rt-field-unified",
+              "name": "route_type",
+              "value": "={{ $json.route_type }}",
+              "type": "string"
+            },
+            {
+              "id": "msg-field-unified",
+              "name": "message",
+              "value": "={{ $json.route_type === 'delivery' ? 'Delivery route optimized successfully' : 'Pickup route optimized successfully' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b50236fd-17eb-49d3-98db-421ee472b2cb",
+      "name": "Format Webhook Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        2640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "60144974-81a9-4093-9496-dad663c6566f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        2640
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Edit Fields').first().json.language }}",
+                    "rightValue": "FR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "27feabd7-a36e-4138-91b3-3006110cbe51"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Français"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b0a43e4f-20d2-46bd-9978-9f3c46e0a209",
+                    "leftValue": "={{ $('Edit Fields').first().json.language }}",
+                    "rightValue": "NL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nederlands"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "176c0019-2400-4ebd-8030-ea2374708623",
+                    "leftValue": "={{ $('Edit Fields').first().json.language }}",
+                    "rightValue": "TR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TR"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 0
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        2864
+      ],
+      "id": "5560698b-a029-4267-9f89-b8acb9d4b9bc",
+      "name": "Language Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "totalDistance",
+              "value": "={{ Math.round($json.total_distance / 1000 * 10) / 10 }}",
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "totalDuration",
+              "value": "={{ Math.round(parseInt($json.total_duration.toString().replace('s','')) / 60) }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "stops",
+              "value": "={{ $json.stops.map(s => ({ orderId: s.order_id, order_id: s.order_id, estimatedArrival: s.eta.substring(11, 16), customer_name: s.customer_name, customer_phone: s.customer_phone, address: s.address })) }}",
+              "type": "array"
+            },
+            {
+              "id": "cc87d43c-c2d0-4084-b0b7-8d282701129e",
+              "name": "returnTime",
+              "value": "={{ (() => { const totalSec = parseInt($json.total_duration.toString().replace('s','')); const parts = $json.departure_time.split(':').map(Number); const h = parts[0]; const m = parts[1]; const totalMin = h * 60 + m + Math.round(totalSec / 60); const rh = Math.floor(totalMin / 60) % 24; const rm = totalMin % 60; return String(rh).padStart(2,'0') + ':' + String(rm).padStart(2,'0'); })() }}",
+              "type": "string"
+            },
+            {
+              "id": "rt-field-unified",
+              "name": "route_type",
+              "value": "={{ $json.route_type }}",
+              "type": "string"
+            },
+            {
+              "id": "msg-field-unified",
+              "name": "message",
+              "value": "={{ $json.route_type === 'delivery' ? 'Delivery route optimized successfully' : 'Pickup route optimized successfully' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1be1d7ae-024a-4be0-af45-4abeeb2b0628",
+      "name": "Format Webhook Response6",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "bab322bd-a273-4326-907b-f0eacfa34d40",
+      "name": "Respond to Webhook6",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        2880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "totalDistance",
+              "value": "={{ Math.round($json.total_distance / 1000 * 10) / 10 }}",
+              "type": "number"
+            },
+            {
+              "id": "id-3",
+              "name": "totalDuration",
+              "value": "={{ Math.round(parseInt($json.total_duration.toString().replace('s','')) / 60) }}",
+              "type": "number"
+            },
+            {
+              "id": "id-4",
+              "name": "stops",
+              "value": "={{ $json.stops.map(s => ({ orderId: s.order_id, order_id: s.order_id, estimatedArrival: s.eta.substring(11, 16), customer_name: s.customer_name, customer_phone: s.customer_phone, address: s.address })) }}",
+              "type": "array"
+            },
+            {
+              "id": "cc87d43c-c2d0-4084-b0b7-8d282701129e",
+              "name": "returnTime",
+              "value": "={{ (() => { const totalSec = parseInt($json.total_duration.toString().replace('s','')); const parts = $json.departure_time.split(':').map(Number); const h = parts[0]; const m = parts[1]; const totalMin = h * 60 + m + Math.round(totalSec / 60); const rh = Math.floor(totalMin / 60) % 24; const rm = totalMin % 60; return String(rh).padStart(2,'0') + ':' + String(rm).padStart(2,'0'); })() }}",
+              "type": "string"
+            },
+            {
+              "id": "rt-field-unified",
+              "name": "route_type",
+              "value": "={{ $json.route_type }}",
+              "type": "string"
+            },
+            {
+              "id": "msg-field-unified",
+              "name": "message",
+              "value": "={{ $json.route_type === 'delivery' ? 'Delivery route optimized successfully' : 'Pickup route optimized successfully' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "be62f268-f512-4284-bc50-669990fa19fd",
+      "name": "Format Webhook Response7",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "6d1a9aba-c08f-44dd-aa08-1d233fd631d1",
+      "name": "Respond to Webhook7",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        3120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst stops = data.stops || [];\nconst routeType = data.route_type || 'pickup';\nconst actionNL = routeType === 'pickup' ? 'ophalen' : 'leveren';\nconst routeDate = data.route_date || '';\n\nconst dateObj = new Date(routeDate + 'T12:00:00');\nconst dayName = dateObj.toLocaleDateString('nl-BE', { weekday: 'long' });\nconst dayNum = dateObj.getDate();\nconst monthName = dateObj.toLocaleDateString('nl-BE', { month: 'long' });\nconst dateStr = `${dayName} ${dayNum} ${monthName}`;\n\nreturn stops\n  .filter(s => s.customer_phone)\n  .map(s => ({\n    json: {\n      phone: s.customer_phone.replace(/^0/, '32').replace(/\\D/g, ''),\n      message: `Beste ${s.customer_name},\\n\\n🕐 Ons team zal op *${dateStr}* rond *${s.estimatedArrival}* bij u zijn.\\n\\nGelieve aanwezig te zijn voor het *${actionNL}* van uw tapijt(en).\\n\\nBedankt voor uw vertrouwen! 🙏\\n— *Team AYKA Tapis*`\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        2880
+      ],
+      "id": "a4e6956a-8a61-47b4-8da6-3873d565b060",
+      "name": "Send text NL1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst stops = data.stops || [];\nconst routeType = data.route_type || 'pickup';\nconst actionFR = routeType === 'pickup' ? 'collecte' : 'livraison';\nconst routeDate = data.route_date || '';\n\n// Format date as \"mercredi 25 mars\"\nconst dateObj = new Date(routeDate + 'T12:00:00');\nconst dayName = dateObj.toLocaleDateString('fr-BE', { weekday: 'long' });\nconst dayNum = dateObj.getDate();\nconst monthName = dateObj.toLocaleDateString('fr-BE', { month: 'long' });\nconst dateStr = `${dayName} ${dayNum} ${monthName}`;\n\nreturn stops\n  .filter(s => s.customer_phone)\n  .map(s => ({\n    json: {\n      phone: s.customer_phone.replace(/^0/, '32').replace(/\\D/g, ''),\n      message: `Bonjour ${s.customer_name},\\n\\n🕐 Notre équipe passera chez vous le *${dateStr}* vers *${s.estimatedArrival}*.\\n\\nMerci d'être présent(e) pour la *${actionFR}* de vos tapis.\\n\\nMerci de votre confiance ! 🙏\\n— *Équipe AYKA Tapis*`\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        2640
+      ],
+      "id": "05f9143d-8b2c-44af-a431-abb61bec0830",
+      "name": "Send text FR1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst stops = data.stops || [];\nconst routeType = data.route_type || 'pickup';\nconst actionTR = routeType === 'pickup' ? 'teslim alınması' : 'teslim edilmesi';\nconst routeDate = data.route_date || '';\n\nconst dateObj = new Date(routeDate + 'T12:00:00');\nconst dayName = dateObj.toLocaleDateString('tr-TR', { weekday: 'long' });\nconst dayNum = dateObj.getDate();\nconst monthName = dateObj.toLocaleDateString('tr-TR', { month: 'long' });\nconst dateStr = `${dayName} ${dayNum} ${monthName}`;\n\nreturn stops\n  .filter(s => s.customer_phone)\n  .map(s => ({\n    json: {\n      phone: s.customer_phone.replace(/^0/, '32').replace(/\\D/g, ''),\n      message: `Sayın ${s.customer_name},\\n\\n🕐 Ekibimiz *${dateStr}* günü saat *${s.estimatedArrival}* civarında adresinizde olacaktır.\\n\\nHalılarınızın *${actionTR}* için hazır olmanızı rica ederiz.\\n\\nBize güvendiğiniz için teşekkürler! 🙏\\n— *AYKA Tapis Ekibi*`\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        3120
+      ],
+      "id": "aebf6267-530c-4d79-942c-7e960c67bebf",
+      "name": "Send text TR1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs",
+          "mode": "list",
+          "cachedResultName": "Ayka_Rota_Kayitlari",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Müşteri Adı": "={{ $('Receive Route Request').item.json.body.orders[0].customer_name }}",
+            "Telefon": "={{ $('Receive Route Request').item.json.body.orders[0].customer_phone }}",
+            "Tarih": "={{ $now }}",
+            "Dil": "={{ $('Edit Fields').first().json.language }}",
+            "İşlem Türü": "={{ $('Receive Route Request').item.json.route_type }}",
+            "Adres": "={{ $('Receive Route Request').item.json.orders[0].address }}",
+            "Sipariş nr": "={{ $('Receive Route Request').item.json.body.orders[0] }}",
+            "Halı Sayısı": "={{ $('Receive Route Request').item.json.orders[0].carpet_count }}",
+            "Tutar": "={{ $('Receive Route Request').item.json.orders[0].total_amount }} €"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sipariş nr",
+              "displayName": "Sipariş nr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tarih",
+              "displayName": "Tarih",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Müşteri Adı",
+              "displayName": "Müşteri Adı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Halı Sayısı",
+              "displayName": "Halı Sayısı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tutar",
+              "displayName": "Tutar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dil",
+              "displayName": "Dil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "İşlem Türü",
+              "displayName": "İşlem Türü",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Adres",
+              "displayName": "Adres",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1952,
+        2640
+      ],
+      "id": "48213de5-5dc1-4f36-a819-200b2815e46a",
+      "name": "Ayka_Rota_Kayitlari3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fb6mDntx6j2VryDa",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs",
+          "mode": "list",
+          "cachedResultName": "Ayka_Rota_Kayitlari",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Müşteri Adı": "={{ $json.stops[0].customer_name }}",
+            "Tutar": "",
+            "Telefon": "={{ $json.stops[0].customer_phone }}",
+            "Tarih": "={{ $now }}",
+            "Halı Sayısı": "",
+            "Dil": "={{ $('Edit Fields').first().json.language }}",
+            "İşlem Türü": "={{ $json.route_type }}",
+            "Adres": "={{ $json.stops[0].address }}",
+            "Sipariş nr": "={{ $json.stops[0].order_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sipariş nr",
+              "displayName": "Sipariş nr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tarih",
+              "displayName": "Tarih",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Müşteri Adı",
+              "displayName": "Müşteri Adı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Halı Sayısı",
+              "displayName": "Halı Sayısı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tutar",
+              "displayName": "Tutar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dil",
+              "displayName": "Dil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "İşlem Türü",
+              "displayName": "İşlem Türü",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Adres",
+              "displayName": "Adres",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1952,
+        2880
+      ],
+      "id": "09f5c27a-c30d-4f32-828b-b45141ed5d19",
+      "name": "Ayka_Rota_Kayitlari4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fb6mDntx6j2VryDa",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs",
+          "mode": "list",
+          "cachedResultName": "Ayka_Rota_Kayitlari",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZKDfHaY_glOU_xaBdJwkJs7rK5e2v_zvpJ_OQW7VNOs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Müşteri Adı": "={{ $json.stops[0].customer_name }}",
+            "Tutar": "",
+            "Telefon": "={{ $json.stops[0].customer_phone }}",
+            "Tarih": "={{ $now }}",
+            "Halı Sayısı": "",
+            "Dil": "={{ $('Edit Fields').first().json.language }}",
+            "İşlem Türü": "={{ $json.route_type }}",
+            "Adres": "={{ $json.stops[0].address }}",
+            "Sipariş nr": "={{ $json.stops[0].order_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Sipariş nr",
+              "displayName": "Sipariş nr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tarih",
+              "displayName": "Tarih",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Müşteri Adı",
+              "displayName": "Müşteri Adı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefon",
+              "displayName": "Telefon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Halı Sayısı",
+              "displayName": "Halı Sayısı",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tutar",
+              "displayName": "Tutar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dil",
+              "displayName": "Dil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "İşlem Türü",
+              "displayName": "İşlem Türü",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Adres",
+              "displayName": "Adres",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1952,
+        3120
+      ],
+      "id": "a5cae8bc-4613-42db-864f-906e1de71c0f",
+      "name": "Ayka_Rota_Kayitlari5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fb6mDntx6j2VryDa",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Whatsapp_aydin",
+        "remoteJid": "={{ $json.phone }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        2640
+      ],
+      "id": "ec892c3e-4063-42e0-ad81-f377e6cfe530",
+      "name": "WA Send FR",
+      "credentials": {
+        "evolutionApi": {
+          "id": "cSG3VRVBtv2kC6BW",
+          "name": "Ayka"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Whatsapp_aydin",
+        "remoteJid": "={{ $json.phone }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        2880
+      ],
+      "id": "6b25662b-2c95-4711-909e-a1cabeeedb7e",
+      "name": "WA Send NL",
+      "credentials": {
+        "evolutionApi": {
+          "id": "cSG3VRVBtv2kC6BW",
+          "name": "Ayka"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Whatsapp_aydin",
+        "remoteJid": "={{ $json.phone }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-en.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        3120
+      ],
+      "id": "fc950f74-a496-4fdb-8f6b-21e1c87cd2fd",
+      "name": "WA Send TR",
+      "credentials": {
+        "evolutionApi": {
+          "id": "cSG3VRVBtv2kC6BW",
+          "name": "Ayka"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Route Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Validate Input Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input Data": {
+      "main": [
+        [
+          {
+            "node": "Google Routes API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Routes API": {
+      "main": [
+        [
+          {
+            "node": "Check API Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check API Success": {
+      "main": [
+        [
+          {
+            "node": "Parse Google Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - API Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Google Response": {
+      "main": [
+        [
+          {
+            "node": "Calculate Stop ETAs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Stop ETAs": {
+      "main": [
+        [
+          {
+            "node": "Language Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Webhook Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Language Switch": {
+      "main": [
+        [
+          {
+            "node": "Format Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Webhook Response6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Webhook Response7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Webhook Response6": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook6": {
+      "main": [
+        []
+      ]
+    },
+    "Format Webhook Response7": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook7": {
+      "main": [
+        []
+      ]
+    },
+    "Send text NL1": {
+      "main": [
+        [
+          {
+            "node": "WA Send NL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Send NL": {
+      "main": [
+        [
+          {
+            "node": "Ayka_Rota_Kayitlari4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send text FR1": {
+      "main": [
+        [
+          {
+            "node": "WA Send FR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Send FR": {
+      "main": [
+        [
+          {
+            "node": "Ayka_Rota_Kayitlari3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send text TR1": {
+      "main": [
+        [
+          {
+            "node": "WA Send TR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Send TR": {
+      "main": [
+        [
+          {
+            "node": "Ayka_Rota_Kayitlari5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "pkiUdvFhm4gvAnZZ",
+    "timezone": "Europe/Brussels",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "b732e74d-e110-478a-bc80-48cca627529b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "106b42e772a41d0231f58c6096d3a0aa4500a44f2de66a43c385fa15d091a6db"
+  },
+  "id": "OhBvaPoczlPgIJmr",
+  "tags": [
+    {
+      "updatedAt": "2026-03-14T10:55:42.604Z",
+      "createdAt": "2026-03-14T10:55:42.604Z",
+      "id": "N5iwJYvwrx16qLWn",
+      "name": "ayka"
+    }
+  ]
+}
