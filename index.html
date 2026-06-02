@@ -148,6 +148,11 @@
     .btn-purple{border:1px solid rgba(123,92,240,.32);color:#9D7EF5;padding:.78rem 1.85rem;border-radius:.6rem;display:inline-flex;align-items:center;gap:.55rem;transition:transform .22s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s;text-decoration:none;font-weight:500;cursor:pointer;background:transparent}
     .btn-purple:hover{background:rgba(123,92,240,.08);border-color:rgba(123,92,240,.55);transform:translateY(-2px)}
 
+    .btn-coral{border:1px solid rgba(255,107,74,.32);color:#FF6B4A;padding:.78rem 1.85rem;border-radius:.6rem;display:inline-flex;align-items:center;gap:.55rem;transition:transform .22s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s;text-decoration:none;font-weight:500;cursor:pointer;background:transparent}
+    .btn-coral:hover{background:rgba(255,107,74,.08);border-color:rgba(255,107,74,.55);transform:translateY(-2px)}
+    .btn-coral:active{transform:translateY(0)}
+    .btn-coral:focus-visible{outline:2px solid #FF6B4A;outline-offset:3px}
+
     /* WhatsApp floating */
     .wa-float{position:fixed;right:22px;bottom:22px;z-index:55;display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:999px;background:linear-gradient(135deg,#25D366 0%,#128C7E 100%);color:#fff;text-decoration:none;font-weight:600;font-size:.875rem;box-shadow:0 8px 28px rgba(37,211,102,.35),0 0 0 1px rgba(255,255,255,.05);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
     .wa-float:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 40px rgba(37,211,102,.5)}
@@ -691,7 +696,7 @@
         </p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-6 reveal-stagger">
+      <div class="grid lg:grid-cols-3 gap-6 reveal-stagger">
 
         <!-- AI CREATIVE STUDIO -->
         <div class="glass-card rounded-2xl p-8 shadow-teal service-card" style="border:1px solid rgba(0,229,190,.12);">
@@ -809,6 +814,121 @@
           <a href="#contact?service=performance" class="btn-purple" style="width:100%;justify-content:center;" data-i18n="studio.s2.cta">Auditer mes campagnes</a>
         </div>
 
+        <!-- AI SOFTWARE & SAAS -->
+        <div class="glass-card rounded-2xl p-8 shadow-coral service-card" style="border:1px solid rgba(255,107,74,.12);">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.6rem;">
+            <div class="icon-box icon-box-coral" style="width:60px;height:60px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 20h8M12 17v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7 9l2.4 2.4L7 13.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 13.8h4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <span class="tag tag-coral" data-i18n="studio.s3.tag">Logiciels Sur-Mesure</span>
+              <h3 style="font-weight:600;font-size:1.45rem;color:#E2EAF8;margin-top:6px;letter-spacing:-.022em;" data-i18n="studio.s3.title">Solutions SaaS &amp; CRM IA</h3>
+            </div>
+          </div>
+
+          <p style="font-size:.94rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.75rem;" data-i18n="studio.s3.desc">
+            Des plateformes métier sur-mesure propulsées par l'IA : CRM logistique, optimisation de tournées, assistant téléphonique vocal et notifications WhatsApp automatisées. De la prise de rendez-vous à la livraison, chaque étape est connectée et automatisée.
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:rgba(255,107,74,.04);border:1px solid rgba(255,107,74,.09);border-radius:10px;">
+              <div class="icon-box icon-box-coral" style="width:38px;height:38px;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 2L2 4v10l4-2 4 2 4-2V2l-4 2-4-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 2v10M10 4v10" stroke="currentColor" stroke-width="1.3"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="studio.s3.f1t">CRM &amp; Optimisation de Tournées</div>
+                <div style="font-size:.8rem;color:#8FA0BF;line-height:1.55;" data-i18n="studio.s3.f1d">Carte en niveaux de gris, tracés néon en temps réel, regroupement d'adresses automatique et heure d'arrivée estimée.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:rgba(255,107,74,.04);border:1px solid rgba(255,107,74,.09);border-radius:10px;">
+              <div class="icon-box icon-box-coral" style="width:38px;height:38px;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5.4 2.3l1.4 3-1.2 1.2a8 8 0 0 0 3.4 3.4l1.2-1.2 3 1.4v2.4a1 1 0 0 1-1.1 1A11 11 0 0 1 3 4.4 1 1 0 0 1 4 3.3h1.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="studio.s3.f2t">Assistant Téléphonique IA</div>
+                <div style="font-size:.8rem;color:#8FA0BF;line-height:1.55;" data-i18n="studio.s3.f2d">Agent vocal IA avec intégration Twilio &amp; Vapi — planifie et confirme les rendez-vous automatiquement.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:rgba(255,107,74,.04);border:1px solid rgba(255,107,74,.09);border-radius:10px;">
+              <div class="icon-box icon-box-coral" style="width:38px;height:38px;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.6 13.4l1-2.6A6 6 0 1 1 8 13.6a6.2 6.2 0 0 1-2.6-.6l-2.8.4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="studio.s3.f3t">Notifications WhatsApp</div>
+                <div style="font-size:.8rem;color:#8FA0BF;line-height:1.55;" data-i18n="studio.s3.f3d">Via Evolution API : horaires de rendez-vous et estimations de livraison envoyés automatiquement aux clients.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:rgba(255,107,74,.04);border:1px solid rgba(255,107,74,.09);border-radius:10px;">
+              <div class="icon-box icon-box-coral" style="width:38px;height:38px;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="2" width="8" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6.8 12h2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;color:#E2EAF8;margin-bottom:2px;" data-i18n="studio.s3.f4t">Applications Chauffeur &amp; Atelier</div>
+                <div style="font-size:.8rem;color:#8FA0BF;line-height:1.55;" data-i18n="studio.s3.f4d">Web-apps mobiles dédiées : les chauffeurs rapportent l'état des livraisons, l'atelier suit ses opérations.</div>
+              </div>
+            </div>
+          </div>
+
+          <a href="#contact?service=saas" class="btn-coral" style="width:100%;justify-content:center;" data-i18n="studio.s3.cta">Découvrir nos solutions SaaS</a>
+        </div>
+
+      </div>
+
+      <!-- ===== K-SAT AI LOGISTICS ERP — PRODUCT SHOWCASE (screenshots réels) ===== -->
+      <style>
+        .ksat-showcase .ksat-frame{transition:transform .45s cubic-bezier(.34,1.56,.64,1),box-shadow .45s;will-change:transform}
+        .ksat-browser{transform:perspective(1200px) rotateY(-7deg);box-shadow:0 30px 70px rgba(0,0,0,.55)}
+        .ksat-phone{transform:rotate(-6deg)}
+        .ksat-showcase:hover .ksat-browser{transform:perspective(1200px) rotateY(-2deg) translateY(-10px)}
+        .ksat-showcase:hover .ksat-phone{transform:rotate(-2deg) translateY(8px) translateX(-8px) scale(1.04)}
+        .ksat-shot-img{display:block;width:100%;height:auto}
+        @media (max-width:1023px){
+          .ksat-stage{flex-direction:column;gap:0}
+          .ksat-browser,.ksat-showcase:hover .ksat-browser{transform:translateY(0)}
+          .ksat-phone,.ksat-showcase:hover .ksat-phone{transform:translateY(-46px) rotate(-3deg)}
+          .ksat-phone-wrap{margin-left:0!important}
+        }
+      </style>
+      <div class="ksat-showcase reveal" style="margin-top:3rem;">
+        <div class="glass-card rounded-2xl service-card" style="border:1px solid rgba(255,107,74,.22);box-shadow:0 0 0 1px rgba(255,107,74,.06),0 24px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;">
+          <div style="position:absolute;inset:auto -120px -120px auto;width:300px;height:300px;border-radius:50%;background:rgba(255,107,74,.14);filter:blur(90px);pointer-events:none;"></div>
+          <div style="position:absolute;inset:-120px auto auto -120px;width:260px;height:260px;border-radius:50%;background:rgba(0,229,190,.10);filter:blur(90px);pointer-events:none;"></div>
+          <div class="grid lg:grid-cols-2 gap-8" style="padding:2.6rem;align-items:center;position:relative;z-index:1;">
+
+            <!-- Texte -->
+            <div>
+              <span class="tag tag-coral" style="display:inline-flex;margin-bottom:1rem;">K-SAT AI Logistics ERP</span>
+              <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.1;letter-spacing:-.022em;color:#E2EAF8;margin-bottom:.9rem;">
+                <span class="text-gradient-mix" data-i18n="studio.s3.title">Solutions SaaS &amp; CRM IA</span>
+              </h3>
+              <p style="font-size:.95rem;line-height:1.75;color:#8FA0BF;margin-bottom:1.7rem;max-width:560px;" data-i18n="studio.s3.desc">Des plateformes métier sur-mesure propulsées par l'IA : CRM logistique, optimisation de tournées, assistant téléphonique vocal et notifications WhatsApp automatisées. De la prise de rendez-vous à la livraison, chaque étape est connectée et automatisée.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.9rem;">
+                <div style="display:flex;gap:9px;align-items:center;font-size:.82rem;color:#C9D5EE;line-height:1.4;"><span style="width:6px;height:6px;border-radius:50%;background:#FF6B4A;flex-shrink:0;"></span><span data-i18n="studio.s3.f1t">CRM &amp; Optimisation de tournées</span></div>
+                <div style="display:flex;gap:9px;align-items:center;font-size:.82rem;color:#C9D5EE;line-height:1.4;"><span style="width:6px;height:6px;border-radius:50%;background:#FF6B4A;flex-shrink:0;"></span><span data-i18n="studio.s3.f2t">Assistant téléphonique IA · Vapi</span></div>
+                <div style="display:flex;gap:9px;align-items:center;font-size:.82rem;color:#C9D5EE;line-height:1.4;"><span style="width:6px;height:6px;border-radius:50%;background:#FF6B4A;flex-shrink:0;"></span><span data-i18n="studio.s3.f3t">Notifications WhatsApp automatisées</span></div>
+                <div style="display:flex;gap:9px;align-items:center;font-size:.82rem;color:#C9D5EE;line-height:1.4;"><span style="width:6px;height:6px;border-radius:50%;background:#FF6B4A;flex-shrink:0;"></span><span data-i18n="studio.s3.f4t">Apps mobiles Chauffeur &amp; Atelier</span></div>
+              </div>
+              <a href="#contact?service=saas" class="btn-coral" data-i18n="studio.s3.cta">Découvrir nos solutions SaaS</a>
+            </div>
+
+            <!-- Mockups (captures réelles) -->
+            <div class="ksat-stage" style="display:flex;align-items:center;justify-content:center;min-height:300px;">
+              <div class="ksat-frame ksat-browser" style="flex:0 0 auto;width:78%;max-width:440px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:#0C1220;">
+                <div style="display:flex;align-items:center;gap:6px;padding:9px 12px;background:#131A2B;border-bottom:1px solid rgba(255,255,255,.06);">
+                  <span style="width:9px;height:9px;border-radius:50%;background:#FF5F57;"></span>
+                  <span style="width:9px;height:9px;border-radius:50%;background:#FEBC2E;"></span>
+                  <span style="width:9px;height:9px;border-radius:50%;background:#28C840;"></span>
+                  <span style="margin-left:10px;font-size:.62rem;color:#5C6B8A;letter-spacing:.04em;">dashboard.k-sat.ai</span>
+                </div>
+                <img class="ksat-shot-img" src="Marketing/screenshots/dashboard%201.JPG" alt="K-SAT AI Logistics — Panneau SaaS &amp; optimisation de tournées" loading="lazy">
+              </div>
+              <div class="ksat-frame ksat-phone ksat-phone-wrap" style="flex:0 0 auto;width:142px;margin-left:-58px;border-radius:24px;overflow:hidden;border:5px solid #1A2336;background:#0C1220;box-shadow:0 22px 48px rgba(0,0,0,.62);">
+                <img class="ksat-shot-img" src="Marketing/screenshots/driver%201.JPG" alt="K-SAT AI Logistics — Application mobile chauffeur" loading="lazy">
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
 
       <!-- Tag cloud -->
@@ -1442,6 +1562,61 @@
         <p style="margin-top:1.1rem;font-size:1.0625rem;line-height:1.75;color:#8FA0BF;max-width:620px;margin-left:auto;margin-right:auto;" data-i18n="eng.desc">
           Pas de pack figé. Nous nous adaptons à votre rythme, à votre budget et à votre ambition. Devis chiffré sous 48h après le brief.
         </p>
+      </div>
+
+      <!-- AI Software & SaaS (horizontal feature plan) -->
+      <div class="reveal" style="max-width:1080px;margin:0 auto 2.4rem;">
+        <div class="glass-card rounded-2xl service-card" style="border:1px solid rgba(255,107,74,.28);box-shadow:0 0 0 1px rgba(255,107,74,.08),0 22px 50px rgba(0,0,0,.5);overflow:hidden;position:relative;">
+          <div style="position:absolute;inset:auto -90px -90px auto;width:220px;height:220px;border-radius:50%;background:rgba(255,107,74,.12);filter:blur(72px);pointer-events:none;"></div>
+          <div class="grid lg:grid-cols-12 gap-7" style="padding:2.4rem;align-items:center;position:relative;z-index:1;">
+
+            <!-- Identity + pricing -->
+            <div class="lg:col-span-5">
+              <span class="tag tag-coral" data-i18n="engage.p4.tag">Logiciel &amp; SaaS</span>
+              <h3 style="font-weight:700;font-size:1.5rem;color:#E2EAF8;margin:.7rem 0 .5rem;letter-spacing:-.022em;" data-i18n="engage.p4.name">AI Software &amp; SaaS Setup</h3>
+              <p style="font-size:.9rem;line-height:1.7;color:#8FA0BF;margin-bottom:1.3rem;" data-i18n="engage.p4.desc">Déployez votre écosystème logiciel IA : panneaux, applications mobiles, automatisations et intégrations clés en main.</p>
+              <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:1.4rem;">
+                <div>
+                  <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:#E2EAF8;" data-i18n="engage.p4.price">À partir de 2 500 €</span>
+                  <div style="font-size:.7rem;color:#8FA0BF;letter-spacing:.05em;text-transform:uppercase;margin-top:3px;" data-i18n="engage.p4.priceNote">Installation unique</div>
+                </div>
+                <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+                <div>
+                  <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:#FF6B4A;" data-i18n="engage.p4.monthly">À partir de 299 € / mois</span>
+                  <div style="font-size:.7rem;color:#8FA0BF;letter-spacing:.05em;text-transform:uppercase;margin-top:3px;" data-i18n="engage.p4.monthlyNote">Abonnement</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Features -->
+            <div class="lg:col-span-5">
+              <div style="display:flex;flex-direction:column;gap:11px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M13 4L6 11L3 8" stroke="#FF6B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span style="font-size:.86rem;color:#8FA0BF;" data-i18n="engage.p4.f1">Tous les panneaux et applications mobiles inclus</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M13 4L6 11L3 8" stroke="#FF6B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span style="font-size:.86rem;color:#8FA0BF;" data-i18n="engage.p4.f2">Mise en place Google Maps &amp; automatisation n8n</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M13 4L6 11L3 8" stroke="#FF6B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span style="font-size:.86rem;color:#8FA0BF;" data-i18n="engage.p4.f3">Intégration WhatsApp sur votre propre numéro</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M13 4L6 11L3 8" stroke="#FF6B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span style="font-size:.86rem;color:#8FA0BF;" data-i18n="engage.p4.f4">Assistant vocal IA intégré (Vapi)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="lg:col-span-2" style="display:flex;">
+              <a href="#contact?service=saas" class="btn-coral" style="width:100%;justify-content:center;" data-i18n="engage.p4.cta">Demander un devis SaaS</a>
+            </div>
+
+          </div>
+        </div>
       </div>
 
       <div class="grid md:grid-cols-3 gap-5 reveal-stagger">
@@ -2159,7 +2334,7 @@
         'cookie.body':"Nous utilisons des cookies pour mesurer l'audience (Google Analytics, Meta Pixel, LinkedIn Insight, GTM) et améliorer votre expérience.",
         'cookie.accept':'Accepter','cookie.refuse':'Refuser',
 
-        'eng.label':'Comment travailler ensemble','eng.title1':'Trois formats.','eng.title2':'Choisissez le vôtre.',
+        'engage.p4.tag':'Logiciel &amp; SaaS','engage.p4.name':'AI Software &amp; SaaS Setup','engage.p4.desc':'Déployez votre écosystème logiciel IA : panneaux, applications mobiles, automatisations et intégrations clés en main.','engage.p4.price':'À partir de 2 500 €','engage.p4.priceNote':'Installation unique','engage.p4.monthly':'À partir de 299 € / mois','engage.p4.monthlyNote':'Abonnement','engage.p4.f1':'Tous les panneaux et applications mobiles inclus','engage.p4.f2':'Mise en place Google Maps &amp; automatisation n8n','engage.p4.f3':'Intégration WhatsApp sur votre propre numéro','engage.p4.f4':'Assistant vocal IA intégré (Vapi)','engage.p4.cta':'Demander un devis SaaS','studio.s3.tag':'Logiciels Sur-Mesure','studio.s3.title':'Solutions SaaS &amp; CRM IA','studio.s3.desc':"Des plateformes métier sur-mesure propulsées par l'IA : CRM logistique, optimisation de tournées, assistant téléphonique vocal et notifications WhatsApp automatisées. De la prise de rendez-vous à la livraison, chaque étape est connectée et automatisée.",'studio.s3.f1t':'CRM &amp; Optimisation de Tournées','studio.s3.f1d':"Carte en niveaux de gris, tracés néon en temps réel, regroupement d'adresses automatique et heure d'arrivée estimée.",'studio.s3.f2t':'Assistant Téléphonique IA','studio.s3.f2d':'Agent vocal IA avec intégration Twilio &amp; Vapi — planifie et confirme les rendez-vous automatiquement.','studio.s3.f3t':'Notifications WhatsApp','studio.s3.f3d':'Via Evolution API : horaires de rendez-vous et estimations de livraison envoyés automatiquement aux clients.','studio.s3.f4t':'Applications Chauffeur &amp; Atelier','studio.s3.f4d':"Web-apps mobiles dédiées : les chauffeurs rapportent l'état des livraisons, l'atelier suit ses opérations.",'studio.s3.cta':'Découvrir nos solutions SaaS','eng.label':'Comment travailler ensemble','eng.title1':'Trois formats.','eng.title2':'Choisissez le vôtre.',
         'eng.desc':"Pas de pack figé. Nous nous adaptons à votre rythme, à votre budget et à votre ambition. Devis chiffré sous 48h après le brief.",
         'eng.f1.tag':'Le plus choisi','eng.f1.title':'Retainer mensuel',
         'eng.f1.sub':"Pipeline créa + média continu. Une équipe dédiée, un cycle hebdomadaire, des résultats composés.",
@@ -2274,7 +2449,7 @@
         'footer.l.creative':'AI Creative Studio','footer.l.perf':'Performance Advertising','footer.l.ai':'AI Video Production','footer.l.brand':'Brand Identity',
         'footer.l.pipeline':'8-phase Pipeline','footer.l.depts':'5 Departments','footer.l.cases':'Case studies','footer.l.contact':'Contact & brief',
         'footer.copy':'© 2026 K-SAT — AI Creative & Performance Agency. All rights reserved.',
-        'footer.privacy':'Privacy','footer.terms':'Terms',
+        'footer.privacy':'Privacy','footer.terms':'Terms','studio.s3.tag':'Custom Software','studio.s3.title':'AI SaaS &amp; CRM Solutions','studio.s3.desc':'Bespoke business platforms powered by AI: logistics CRM, route optimization, voice phone assistant and automated WhatsApp notifications. From booking to delivery, every step is connected and automated.','studio.s3.f1t':'CRM &amp; Route Optimization','studio.s3.f1d':'Grayscale map, live neon route lines, automatic address grouping and estimated time of arrival.','studio.s3.f2t':'AI Phone Assistant','studio.s3.f2d':'AI voice agent with Twilio &amp; Vapi integration — schedules and confirms appointments automatically.','studio.s3.f3t':'WhatsApp Notifications','studio.s3.f3d':'Via Evolution API: appointment times and delivery estimates sent to customers automatically.','studio.s3.f4t':'Driver &amp; Workshop Apps','studio.s3.f4d':'Dedicated mobile web apps: drivers report delivery status, the workshop tracks its operations.','studio.s3.cta':'Explore our SaaS solutions','engage.p4.tag':'Software &amp; SaaS','engage.p4.name':'AI Software &amp; SaaS Setup','engage.p4.desc':'Deploy your AI software ecosystem: dashboards, mobile apps, automations and integrations, turnkey.','engage.p4.price':'From €2,500','engage.p4.priceNote':'One-time setup','engage.p4.monthly':'From €299 / month','engage.p4.monthlyNote':'Subscription','engage.p4.f1':'All dashboards and mobile apps included','engage.p4.f2':'Google Maps &amp; n8n automation setup','engage.p4.f3':'WhatsApp integration on your own number','engage.p4.f4':'AI voice assistant integration (Vapi)','engage.p4.cta':'Request a SaaS quote',
 
         'faq.label':'Frequently asked','faq.title1':'Everything','faq.title2':'you want to know.',
         'faq.q1':'How fast do you ship a first campaign?',
@@ -2335,7 +2510,7 @@
         'studio.s2.f2t':'A/B/n test matrix','studio.s2.f2d':'8-15 angles per campagne, hooks & bodies parallel getest.',
         'studio.s2.f3t':'Wekelijkse NBA readout','studio.s2.f3d':'Scale · Kill · Iterate · Pivot. Eén beslissing per signaal — nooit op gevoel.',
         'studio.s2.f4t':'Gezonde tracking · GA4 · UTM','studio.s2.f4d':'Pixel geverifieerd, conversion API, post-iOS attributie — elke euro getraceerd.',
-        'studio.s2.cta':'Audit mijn campagnes',
+        'studio.s2.cta':'Audit mijn campagnes','studio.s3.tag':'Maatwerk Software','studio.s3.title':'AI SaaS &amp; CRM-oplossingen','studio.s3.desc':'Maatwerk bedrijfsplatformen aangedreven door AI: logistiek CRM, route-optimalisatie, telefonische spraakassistent en geautomatiseerde WhatsApp-meldingen. Van afspraak tot levering is elke stap verbonden en geautomatiseerd.','studio.s3.f1t':'CRM &amp; Route-optimalisatie','studio.s3.f1d':'Grijswaardenkaart, live neon-routelijnen, automatische adresgroepering en verwachte aankomsttijd.','studio.s3.f2t':'AI-telefoonassistent','studio.s3.f2d':'AI-spraakagent met Twilio &amp; Vapi-integratie — plant en bevestigt afspraken automatisch.','studio.s3.f3t':'WhatsApp-meldingen','studio.s3.f3d':'Via Evolution API: afspraaktijden en leveringsschattingen automatisch naar klanten verzonden.','studio.s3.f4t':'Chauffeur- &amp; Werkplaats-apps','studio.s3.f4d':'Speciale mobiele web-apps: chauffeurs rapporteren de leveringsstatus, de werkplaats volgt haar activiteiten.','studio.s3.cta':'Ontdek onze SaaS-oplossingen','engage.p4.tag':'Software &amp; SaaS','engage.p4.name':'AI Software &amp; SaaS Setup','engage.p4.desc':'Implementeer uw AI-software-ecosysteem: dashboards, mobiele apps, automatiseringen en integraties, kant-en-klaar.','engage.p4.price':'Vanaf €2.500','engage.p4.priceNote':'Eenmalige installatie','engage.p4.monthly':'Vanaf €299 / maand','engage.p4.monthlyNote':'Abonnement','engage.p4.f1':'Alle dashboards en mobiele apps inbegrepen','engage.p4.f2':'Google Maps &amp; n8n-automatisering installatie','engage.p4.f3':'WhatsApp-integratie op uw eigen nummer','engage.p4.f4':'AI-spraakassistent integratie (Vapi)','engage.p4.cta':'Vraag een SaaS-offerte aan',
         'sectors.label':'Sectoren bediend','sectors.title1':'Negen verticals.','sectors.title2':'Sector-specifieke expertise.',
         'sectors.desc':"Elke sector heeft zijn codes, beperkingen en hefbomen. Wij draaien verticale starter kits — angles, hooks, videoformats en prijsstructuren al gekalibreerd.",
         'sec.dental':'Tandheelkunde & Medisch','sec.dental.d':'Tand-, esthetische, pediatrische klinieken. Conforme patiëntwerving.',
@@ -2470,7 +2645,7 @@
         'studio.s2.f2t':'A/B/n test matrisi','studio.s2.f2d':'Kampanya başına 8-15 angle, hook & body paralel test.',
         'studio.s2.f3t':'Haftalık NBA okuma','studio.s2.f3d':'Scale · Kill · Iterate · Pivot. Sinyale dayalı karar — sezgi değil.',
         'studio.s2.f4t':'Sağlıklı tracking · GA4 · UTM','studio.s2.f4d':'Pixel doğrulanmış, conversion API, post-iOS attribution — her euro takip edilir.',
-        'studio.s2.cta':'Kampanyalarımı denetle',
+        'studio.s2.cta':'Kampanyalarımı denetle','studio.s3.tag':'Özel Yazılımlar','studio.s3.title':'Yapay Zeka SaaS &amp; CRM Çözümleri','studio.s3.desc':'Yapay zeka destekli özel iş platformları: lojistik CRM, rota optimizasyonu, sesli telefon asistanı ve otomatik WhatsApp bildirimleri. Randevudan teslimata kadar her adım birbirine bağlı ve otomatiktir.','studio.s3.f1t':'CRM &amp; Rota Optimizasyonu','studio.s3.f1d':'Gri tonlamalı harita, canlı neon rota çizgileri, otomatik adres gruplama ve tahmini varış süresi.','studio.s3.f2t':'Yapay Zeka Telefon Asistanı','studio.s3.f2d':'Twilio &amp; Vapi entegrasyonlu yapay zeka sesli asistanı — randevuları otomatik planlar ve onaylar.','studio.s3.f3t':'WhatsApp Bildirimleri','studio.s3.f3d':'Evolution API ile: randevu saatleri ve tahmini teslimat bilgileri müşterilere otomatik gönderilir.','studio.s3.f4t':'Sürücü &amp; Atölye Uygulamaları','studio.s3.f4d':'Özel mobil web uygulamaları: sürücüler teslimat durumunu raporlar, atölye işlemlerini takip eder.','studio.s3.cta':'SaaS çözümlerimizi keşfedin','engage.p4.tag':'Yazılım &amp; SaaS','engage.p4.name':'Yapay Zeka &amp; SaaS Entegrasyonu','engage.p4.desc':'Yapay zeka yazılım ekosisteminizi kurun: paneller, mobil uygulamalar, otomasyonlar ve entegrasyonlar — anahtar teslim.','engage.p4.price':"2 500 €'dan başlayan",'engage.p4.priceNote':'Tek seferlik kurulum','engage.p4.monthly':'299 € / aydan başlayan','engage.p4.monthlyNote':'Abonelik','engage.p4.f1':'Tüm paneller ve mobil uygulamalar dahil','engage.p4.f2':'Google Maps &amp; n8n otomasyon altyapısı kurulumu','engage.p4.f3':'Kendi telefon numaranız üzerinden WhatsApp entegrasyonu','engage.p4.f4':'Yapay zeka sesli asistan entegrasyonu (Vapi)','engage.p4.cta':'SaaS teklifi isteyin',
         'sectors.label':'Hizmet verilen sektörler','sectors.title1':'Dokuz dikey.','sectors.title2':'Sektöre özel uzmanlık.',
         'sectors.desc':"Her sektörün kendi kuralları, kısıtları ve kaldıraçları vardır. Dikey starter kit\'lerimiz hazır — angle, hook, video format ve fiyat ızgaraları kalibre edilmiş.",
         'sec.dental':'Diş & Tıp','sec.dental.d':'Diş klinikleri, estetik tıp, pediatrik klinikler. Uyumlu hasta kazanımı.',
