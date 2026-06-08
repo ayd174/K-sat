@@ -25,6 +25,21 @@ PROMPT lar/_workflow_backups/*
 /_workflow_backups/
 workflows/_workflow_backups/
 
+# Operational dumps, scratch & audit dirs — hold live n8n state / service_role
+# JWT / exec data. Never commit (P0 secret-leak fix 2026-06-08).
+_wf_dump.json
+*_wf_dump*.json
+_tmp/
+_audit_*/
+_baseline_tmp/
+_uat_transcripts/
+_snapshot_*.json
+cj1_deployed.js
+sdo.js
+# vapi_optimizer n8n exports / proposed configs — embed live service_role JWT
+vapi_optimizer/workflows/
+vapi_optimizer/proposed_*.json
+
 # Exceptions: source-bound build tooling (no credentials, no PII).
 # Must come AFTER directory-level rules above; parent dir is not excluded
 # (only its contents via glob), enabling re-inclusion.
