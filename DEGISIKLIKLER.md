@@ -312,3 +312,19 @@ Webhook (passthrough) → AI Agent → ... → Channel Router → [SMS] Twilio
 2. **Twilio Account SID:** URL'deki `{{YOUR_ACCOUNT_SID}}` gerçek hesap SID'i ile değiştirilmeli.
 3. **Twilio From numarası:** `+32XXXXXXXXX` gerçek Twilio numarasıyla değiştirilmeli.
 4. **SMS Webhook URL:** `sms-intake` path'i Twilio webhook ayarlarında tanımlanmalı.
+
+---
+
+## 7. GÜVENLİK VE CİRO GİZLİLİĞİ GÜNCELLEMELERİ
+
+**Tarih:** 2026-06-14
+
+### 7.1 Finansal Verilerin Dashboard ve Raporlardan Kaldırılması
+- **Yapılan Değişiklik:** Dashboard kartlarından "Total Revenue" kaldırıldı, yerine **"Total Carpets"** (Toplam Yıkanan Halı) yerleştirildi. Raporlar Genel Bakış sekmesindeki ciro bazlı kartlar ve grafikler, halı adetleri, halı tiplerine ve sürücülere göre halı sayılarının dağılımıyla değiştirildi. Sürücü ve atölye özet kartlarındaki ödeme bilgileri temizlendi.
+- **Neden:** Şirketin ciro verilerinin operatör ve sürücülere açık olması güvenlik/ticari gizlilik açısından risk oluşturmaktadır.
+
+### 7.2 Günlük Ciro E-Posta & Telegram Raporlama ve Veritabanı Temizliği (N8N Otomasyonu)
+- **Dosya:** [DAILY_FINANCIAL_REPORT_AND_CLEANUP.json](file:///f:/AI AGENCY K-SAT/AYKA Transport lojistics projet/workflows/DAILY_FINANCIAL_REPORT_AND_CLEANUP.json)
+- **Yapılan Değişiklik:** Her gece saat 23:59'da çalışacak, o günkü ciro verilerini çekecek, bunları bir Excel (CSV) dosyasına dönüştürecek, şirket sahibinin mailine (SMTP) ve Telegram hesabına (Telegram Bot) iletecek ve **yalnızca gönderim başarılı olursa** Supabase veritabanındaki `total_amount`, `deposit_amount` ve `collected_amount` alanlarını `0` olarak temizleyecek bir N8N iş akışı oluşturuldu.
+- **Deployment Yardımcı Betiği:** [deploy_financial_report_cleanup.py](file:///f:/AI AGENCY K-SAT/AYKA Transport lojistics projet/workflows/deploy_financial_report_cleanup.py) otomatik olarak çalıştırıldı ve iş akışını N8N panelinize yükledi.
+- **Neden:** Kazanç verilerinin veritabanında uzun vadeli olarak saklanmasının önlenmesi, veritabanı sızıntısı durumunda mali bilgileri tamamen koruma altına alır.
