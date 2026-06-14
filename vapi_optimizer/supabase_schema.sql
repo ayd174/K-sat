@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.vapi_prompt_history (
   triggering_call_id  TEXT,
   approval_token      TEXT        NOT NULL UNIQUE,
   status              TEXT        NOT NULL DEFAULT 'pending'
-                                    CHECK (status IN ('pending','approved','deployed','rejected','failed')),
+                                    CHECK (status IN ('pending','approved','deployed','rejected','failed','no_op','hallucinated')),
   approved_at         TIMESTAMPTZ,
   deployed_at         TIMESTAMPTZ,
   rejected_at         TIMESTAMPTZ,
@@ -74,7 +74,7 @@ ALTER TABLE public.vapi_prompt_history
 
 COMMENT ON TABLE  public.vapi_prompt_history IS 'Audit trail of every proposed and deployed system-prompt change.';
 COMMENT ON COLUMN public.vapi_prompt_history.approval_token IS 'Opaque single-use token emitted to the admin via WhatsApp.';
-COMMENT ON COLUMN public.vapi_prompt_history.status         IS 'pending → approved → deployed | rejected | failed.';
+COMMENT ON COLUMN public.vapi_prompt_history.status         IS 'pending → approved → deployed | rejected | failed | no_op (guard: prompt unchanged) | hallucinated (guard: LLM invented change).';
 
 CREATE INDEX IF NOT EXISTS idx_vapi_prompt_history_assistant
   ON public.vapi_prompt_history (assistant_id, created_at DESC);

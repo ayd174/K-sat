@@ -40,6 +40,12 @@ sdo.js
 vapi_optimizer/workflows/
 vapi_optimizer/proposed_*.json
 
+# Apply/protect/smoke python scripts + spec — embed live DB password, VAPI private
+# key, n8n public-API JWT & service_role JWT in cleartext. Never commit (P0 2026-06-14).
+vapi_optimizer/_*.py
+vapi_optimizer/SELF_LEARNING_SPEC.md
+supabase_migrations/_*.py
+
 # Exceptions: source-bound build tooling (no credentials, no PII).
 # Must come AFTER directory-level rules above; parent dir is not excluded
 # (only its contents via glob), enabling re-inclusion.

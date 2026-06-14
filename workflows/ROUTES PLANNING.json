@@ -254,7 +254,7 @@
           "parameters": [
             {
               "name": "X-Goog-Api-Key",
-              "value": "AIzaSyBBCnzbOHnPrMPsuQl6KwZJzMNjKglna3E"
+              "value": "={{ $env.GOOGLE_MAPS_API_KEY }}"
             },
             {
               "name": "X-Goog-FieldMask",
