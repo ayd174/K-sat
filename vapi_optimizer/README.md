@@ -301,9 +301,9 @@ ORDER  BY deployed_at DESC;
 To restore the prompt from row `<id>`:
 
 ```python
-import json, urllib.request, urllib.parse
-PAT  = open('Dashboard_SaaS/.env').read()  # pull SUPABASE_SERVICE_ROLE_KEY
-VAPI = '79faa3a9-8707-4b1f-9e0e-cf78db4dde11'
+import json, os, urllib.request, urllib.parse
+PAT  = os.environ['SUPABASE_SERVICE_ROLE_KEY']
+VAPI = os.environ['VAPI_PRIVATE_KEY']  # source from master .env; never hardcode
 ROW  = 7
 
 # 1. fetch old prompt
