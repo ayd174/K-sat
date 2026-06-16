@@ -52,3 +52,19 @@ supabase_migrations/_*.py
 !PROMPT lar/_workflow_backups/build.py
 !PROMPT lar/_workflow_backups/whitelist_constants.py
 !workflows/ROUTES PLANNING.json
+
+# --- Sweep 2026-06-17: keep secrets / artifacts / scratch out of git ---
+# Env sync script — embeds credentials in cleartext. Never commit.
+scripts/sync_env.ps1
+# VAPI assistant config backups — embed live service_role / VAPI JWT.
+vapi_optimizer/_backup_*/
+# Python build artifacts
+__pycache__/
+*.pyc
+# Monitoring runtime data outputs (the .py tooling is tracked; its data is not)
+scripts/monitoring/*_state.json
+scripts/monitoring/*_raw.jsonl
+scripts/monitoring/*_report.md
+# Scratch API-response dumps
+_preview.json
+_put_resp_*.json
