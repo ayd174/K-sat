@@ -18,6 +18,8 @@ Usage:
     python build.py STAGING --dry    # patch+verify, NO deploy (saves PUT file)
     python build.py verify STAGING   # drift verifier only, no patches
     python build.py verify PROD
+    python build.py seed             # render Supabase postal seed SQL (site 4)
+    python build.py seed --out X.sql # ...to a specific path
 
 Snapshots written to: {env}_v9.12.13.7_LIVE_pre-build_<ts>.json
 PUT payload written to: {env}_v9.12.13.7_PUT_slim.json
@@ -34,17 +36,21 @@ import urllib.request
 from pathlib import Path
 from typing import Callable
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 from whitelist_constants import (  # noqa: E402
-    POSTAL_GROUPS, total_codes,
-    FEATURED_ALPHA2, FEATURED_B9, CONFUSING_GROUPC_CODES,
+    POSTAL_GROUPS, POSTAL_CITIES, total_codes,
     render_js_whitelist, render_js_group_min,
-    render_prompt_block_b9, render_confirmation_block,
-    render_alpha2_positives, render_b9_special_attention,
-    render_group_min_legend, render_confusion_groupc_block,
+    render_confirmation_block, render_postal_seed_sql,
     verify_postal_group_drift,
 )
+# shared version-gate guard (scripts/) — refuses to overwrite an externally
+# drifted workflow and records the deployed baseline after each PUT.
+sys.path.insert(0, str(ROOT.parent.parent / 'scripts'))
+from n8n_deploy_guard import assert_baseline, record_baseline, DriftError  # noqa: E402
 
 # ---------------------------------------------------------------------
 # Constants
@@ -111,27 +117,6 @@ def patch_classifier_js(wf: dict) -> tuple[bool, str]:
     return False, 'FATAL: _postal_classifier node not found'
 
 
-def patch_prompt_b9_whitelist(wf: dict) -> tuple[bool, str]:
-    new_block = render_prompt_block_b9()
-    for n in wf['nodes']:
-        if n['name'] != 'Akilli WhatsApp Asistani':
-            continue
-        sm = n['parameters']['options']['systemMessage']
-        pat = re.compile(
-            r"WHITELIST \(Belçika - Brüksel ve çevresi\) — v9\.12\.4 TEK SATIR FORMAT:\n"
-            r"(    Grup A.*\n    Grup B.*\n    Grup C.*\n    Grup D.*)\n"
-        )
-        m = pat.search(sm)
-        if not m:
-            return False, 'FATAL: B9 whitelist anchor not found'
-        old_block = m.group(1)
-        sm_new = sm.replace(old_block, new_block, 1)
-        changed = sm_new != sm
-        n['parameters']['options']['systemMessage'] = sm_new
-        return changed, ('replaced' if changed else 'already in sync')
-    return False, 'FATAL: Asistani node not found'
-
-
 def patch_confirmation_subprompt(wf: dict) -> tuple[bool, str]:
     new_block = render_confirmation_block()
     for n in wf['nodes']:
@@ -156,98 +141,14 @@ def patch_confirmation_subprompt(wf: dict) -> tuple[bool, str]:
     return False, 'FATAL: Generate Confirmation Message node not found'
 
 
-def patch_alpha2_positives(wf: dict) -> tuple[bool, str]:
-    new_block = render_alpha2_positives()
-    for n in wf['nodes']:
-        if n['name'] != 'Akilli WhatsApp Asistani':
-            continue
-        sm = n['parameters']['options']['systemMessage']
-        pat = re.compile(
-            r"(POZİTİF ÖRNEKLER \(Bölüm 9\.0'dan alıntı, doğrudan kullan\):\n)"
-            r"((?:  - \d{4} \([^)]+\)\s*→ Grup [A-D] →\s*\d+€ min → KAPSAMDA\n){4,8})"
-        )
-        m = pat.search(sm)
-        if not m:
-            return False, 'FATAL: α-2 positives anchor not found'
-        old_block = m.group(2).rstrip('\n')
-        sm_new = sm.replace(old_block, new_block, 1)
-        changed = sm_new != sm
-        n['parameters']['options']['systemMessage'] = sm_new
-        return changed, ('replaced' if changed else 'already in sync')
-    return False, 'FATAL: Asistani node not found'
-
-
-def patch_b9_special_attention(wf: dict) -> tuple[bool, str]:
-    new_block = render_b9_special_attention()
-    for n in wf['nodes']:
-        if n['name'] != 'Akilli WhatsApp Asistani':
-            continue
-        sm = n['parameters']['options']['systemMessage']
-        pat = re.compile(
-            r"(ÖZEL DİKKAT — SIK İHLAL EDİLEN POSTA KODLARI:\n)"
-            r"((?:  \d{4} \([^)]+\)\s*→ Grup [A-D] →\s*\d+€ min\s*→ ✅ KAPSAMDA\n){4,8})"
-        )
-        m = pat.search(sm)
-        if not m:
-            return False, 'FATAL: B9 special attention anchor not found'
-        old_block = m.group(2).rstrip('\n')
-        sm_new = sm.replace(old_block, new_block, 1)
-        changed = sm_new != sm
-        n['parameters']['options']['systemMessage'] = sm_new
-        return changed, ('replaced' if changed else 'already in sync')
-    return False, 'FATAL: Asistani node not found'
-
-
-def patch_alpha2_step2_legend(wf: dict) -> tuple[bool, str]:
-    new_legend = render_group_min_legend()
-    for n in wf['nodes']:
-        if n['name'] != 'Akilli WhatsApp Asistani':
-            continue
-        sm = n['parameters']['options']['systemMessage']
-        pat = re.compile(r"(  2\. Grup minimum tutarını ÖĞREN \()([^)]+)(\)\.)")
-        m = pat.search(sm)
-        if not m:
-            return False, 'FATAL: α-2 step 2 legend anchor not found'
-        if m.group(2) == new_legend:
-            return False, 'already in sync'
-        sm_new = sm[:m.start(2)] + new_legend + sm[m.end(2):]
-        n['parameters']['options']['systemMessage'] = sm_new
-        return True, f'replaced ({m.group(2)!r} → {new_legend!r})'
-    return False, 'FATAL: Asistani node not found'
-
-
-def patch_confusion_block(wf: dict) -> tuple[bool, str]:
-    new_block = render_confusion_groupc_block()
-    for n in wf['nodes']:
-        if n['name'] != 'Akilli WhatsApp Asistani':
-            continue
-        sm = n['parameters']['options']['systemMessage']
-        pat = re.compile(
-            r"(  ⚠️ ÖZEL DİKKAT — [^\n:]+,\n"
-            r"    [^\n:]+:\n"
-            r"    Bu kodlar GRUP C'dir \(\d+€\), Grup A DEĞİL\.\n"
-            r"    Müşteri \"vous venez à partir de \d+€ chez moi\" derse, bu kodlar\n"
-            r"    için DOĞRUDUR\.)"
-        )
-        m = pat.search(sm)
-        if not m:
-            return False, 'FATAL: confusion block anchor not found'
-        old_block = m.group(1)
-        sm_new = sm.replace(old_block, new_block, 1)
-        changed = sm_new != sm
-        n['parameters']['options']['systemMessage'] = sm_new
-        return changed, ('replaced' if changed else 'already in sync')
-    return False, 'FATAL: Asistani node not found'
-
-
 PATCHES: list[tuple[str, Callable[[dict], tuple[bool, str]]]] = [
+    # RETIRED 2026-06-08: the monolithic Asistani prompt blocks (Bolum 9.0 /
+    # alpha-2 / OZEL DIKKAT / legend / confusion) were removed when the bot moved
+    # to the lightweight NLU + DB + state-machine architecture, so P1b/P2a/P2b/
+    # P3/P4 no longer have anchors. Postal codes now also sync to the DB via
+    # `build.py seed`. Only the two still-live prompt-sync sites remain:
     ('P1a  whitelist:classifier-js',     patch_classifier_js),
-    ('P1b  whitelist:b9-prompt',         patch_prompt_b9_whitelist),
     ('P1c  whitelist:confirmation-sub',  patch_confirmation_subprompt),
-    ('P2a  featured:alpha2-positives',   patch_alpha2_positives),
-    ('P2b  featured:b9-special',         patch_b9_special_attention),
-    ('P3   legend:alpha2-step2',         patch_alpha2_step2_legend),
-    ('P4   confusion:groupc',            patch_confusion_block),
 ]
 
 
@@ -267,7 +168,7 @@ def run_drift_verifier(wf: dict) -> tuple[bool, list[str]]:
 
 
 # ---------------------------------------------------------------------
-# Self-consistency check (cross-validate all 7 sites against source)
+# Self-consistency check (cross-validate live sites: classifier + confirmation)
 # ---------------------------------------------------------------------
 
 def run_self_consistency(wf: dict) -> tuple[bool, list[str]]:
@@ -283,31 +184,6 @@ def run_self_consistency(wf: dict) -> tuple[bool, list[str]]:
             for g, src_set in src_by_grp.items():
                 if by_grp.get(g, set()) != src_set:
                     fails.append(f'  P1a Classifier Group {g} drift')
-        elif n['name'] == 'Akilli WhatsApp Asistani':
-            sm = n['parameters']['options']['systemMessage']
-            for g in 'ABCD':
-                m = re.search(rf"    Grup {g} \([^)]+\)\s*:\s*([0-9 ]+)\n", sm)
-                if not m:
-                    fails.append(f'  P1b B9 Group {g} not found')
-                    continue
-                if set(m.group(1).split()) != src_by_grp[g]:
-                    fails.append(f'  P1b B9 Group {g} drift')
-            # Featured
-            for code, lbl in FEATURED_ALPHA2:
-                grp = next(g for g, d in POSTAL_GROUPS.items() if code in d['codes'])
-                min_eur = POSTAL_GROUPS[grp]['min_eur']
-                if f"{code} ({lbl})" not in sm:
-                    fails.append(f'  P2a α-2 missing {code} ({lbl})')
-            for code, lbl in FEATURED_B9:
-                if f"{code} ({lbl})" not in sm:
-                    fails.append(f'  P2b B9 special missing {code} ({lbl})')
-            # Legend
-            if f"({render_group_min_legend()})" not in sm:
-                fails.append('  P3 legend not in α-2 step 2')
-            # Confusion
-            for code, lbl in CONFUSING_GROUPC_CODES:
-                if f"{lbl} ({code})" not in sm:
-                    fails.append(f'  P4 confusion missing {lbl} ({code})')
         elif n['name'] == 'Generate Confirmation Message':
             s = n['parameters']['responses']['values'][0]['content']
             for g in 'ABCD':
@@ -361,11 +237,8 @@ def run(env: str, deploy: bool, verify_only: bool) -> int:
     env_lc = env.lower()
 
     print(f"=== build.py — env={env}  deploy={deploy}  verify_only={verify_only} ===")
-    print(f"source-of-truth: {total_codes()} codes / "
-          f"FEATURED_ALPHA2={len(FEATURED_ALPHA2)} / "
-          f"FEATURED_B9={len(FEATURED_B9)} / "
-          f"CONFUSING_GROUPC={len(CONFUSING_GROUPC_CODES)}")
-    print(f"legend: {render_group_min_legend()}\n")
+    print(f"source-of-truth: {total_codes()} codes across "
+          f"{len(POSTAL_GROUPS)} groups (sites: P1a classifier, P1c confirmation, DB seed)\n")
 
     # 1) Fetch LIVE
     print(f"[fetch] GET workflow {wf_id}")
@@ -421,7 +294,7 @@ def run(env: str, deploy: bool, verify_only: bool) -> int:
     print("[self-consistency]")
     consistent, fails = run_self_consistency(wf)
     if consistent:
-        print("  ✅ all 7 sites match POSTAL_GROUPS source\n")
+        print("  ✅ live sites (P1a classifier + P1c confirmation) match POSTAL_GROUPS source\n")
     else:
         print("  ❌ inconsistencies:")
         for f in fails:
@@ -448,6 +321,15 @@ def run(env: str, deploy: bool, verify_only: bool) -> int:
         return 0
 
     print(f"[deploy] PUT → {env}")
+    # VERSION GATE — abort if the live workflow drifted from our last deploy
+    # (e.g. a stale editor tab re-saved over it). Override with GUARD_FORCE=1.
+    try:
+        assert_baseline(wf_id)
+    except DriftError as e:
+        print(str(e), file=sys.stderr)
+        print("\n[deploy] ABORTED — review the external change, then re-run "
+              "(GUARD_FORCE=1 to overwrite).", file=sys.stderr)
+        return 3
     resp = n8n_put(wf_id, payload, key)
     print(f"  PUT 200 — name={resp.get('name')}  active={resp.get('active')}  updated={resp.get('updatedAt')}")
 
@@ -460,14 +342,57 @@ def run(env: str, deploy: bool, verify_only: bool) -> int:
         time.sleep(2)
         v = n8n_get(f'/workflows/{wf_id}', key)
     print(f"  final: name={v.get('name')!r}  active={v.get('active')}\n")
+    record_baseline(wf_id, v.get('versionId'), v.get('name', ''))
+    print(f"  [guard] ledger baseline updated -> {v.get('versionId')}\n")
+    return 0
+
+
+# ---------------------------------------------------------------------
+# Seed generation (site 4 — Supabase postal_codes_whitelist)
+# ---------------------------------------------------------------------
+
+def run_seed(out_path: Path | None) -> int:
+    """Render the Supabase postal seed SQL from POSTAL_GROUPS/POSTAL_CITIES.
+
+    Importing whitelist_constants already ran _validate_cities() (fails fast if
+    the code/city sets diverge), so reaching here means the source is internally
+    consistent. Writes the generated INSERT to out_path and prints a summary.
+    """
+    sql = render_postal_seed_sql()
+    n_codes = total_codes()
+    # Sanity: rendered row count must equal source code count (no silent loss).
+    rendered_rows = sql.count('\n    (NULL,')
+    if rendered_rows != n_codes:
+        print(f"❌ seed render mismatch: {rendered_rows} rows vs {n_codes} source codes",
+              file=sys.stderr)
+        return 1
+
+    if out_path is None:
+        out_path = ROOT / 'generated_postal_seed.sql'
+    banner = (
+        "-- GENERATED by build.py seed — DO NOT EDIT BY HAND.\n"
+        "-- Source of truth: whitelist_constants.py (POSTAL_GROUPS + POSTAL_CITIES).\n"
+        "-- Requires partial unique index uniq_global_postal_code "
+        "(migration 20260608120000).\n\n"
+    )
+    out_path.write_text(banner + sql + "\n", encoding='utf-8')
+
+    print(f"=== build.py seed ===")
+    print(f"source-of-truth: {n_codes} codes across "
+          f"{len(POSTAL_GROUPS)} groups / {len(POSTAL_CITIES)} city labels")
+    print(f"  rendered rows : {rendered_rows} (matches source ✅)")
+    print(f"  written → {out_path}")
+    print("\nApply to Supabase as a forward migration (or copy into one). "
+          "Idempotent upsert; safe to re-run.")
     return 0
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(prog='build.py', description='AYKA workflow sync')
-    ap.add_argument('action', nargs='?', help='STAGING | PROD | verify')
+    ap.add_argument('action', nargs='?', help='STAGING | PROD | verify | seed')
     ap.add_argument('env', nargs='?', help='env when action=verify (STAGING|PROD)')
     ap.add_argument('--dry', action='store_true', help='skip the PUT step')
+    ap.add_argument('--out', help='output path for seed SQL (action=seed)')
     args = ap.parse_args()
 
     if not args.action:
@@ -484,7 +409,9 @@ def main() -> int:
         if env not in WORKFLOW_IDS:
             print(f"ERR: unknown env {env}", file=sys.stderr); return 2
         return run(env=env, deploy=False, verify_only=True)
-    print(f"ERR: unknown action {action!r} (expected STAGING|PROD|verify)", file=sys.stderr)
+    if action == 'SEED':
+        return run_seed(Path(args.out) if args.out else None)
+    print(f"ERR: unknown action {action!r} (expected STAGING|PROD|verify|seed)", file=sys.stderr)
     return 2
 
 

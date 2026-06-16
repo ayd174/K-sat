@@ -1,12 +1,13 @@
 """AYKA Tapis postal-code WHITELIST — SOURCE OF TRUTH.
 
-Three downstream sites are generated from this module:
+Four downstream sites are generated from this module:
   1. Akilli WhatsApp Asistani prompt — Bölüm 9.0 text block (Turkish "Grup X")
   2. Code node `_postal_classifier` — JS WHITELIST + GROUP_MIN constants
   3. Generate Confirmation Message sub-prompt — "Service area whitelist" block
+  4. Supabase `postal_codes_whitelist` seed SQL (modular bot DB layer)
 
-To add/remove a postal code: edit POSTAL_GROUPS below, run the build script,
-deploy. All three sites stay atomically in sync.
+To add/remove a postal code: edit POSTAL_GROUPS (and POSTAL_CITIES) below, run
+the build script, deploy. All four sites stay atomically in sync.
 """
 from __future__ import annotations
 from typing import Iterable
@@ -31,8 +32,9 @@ POSTAL_GROUPS: dict[str, dict] = {
         'min_eur': 50,
         'codes': [
             '1000', '1020', '1030', '1040', '1060', '1070', '1080', '1081',
-            '1082', '1083', '1090', '1120', '1140', '1190', '1800', '1830',
-            '1831', '1850', '1853', '1930', '1931', '1932', '1933',
+            '1082', '1083', '1090', '1120', '1130', '1140', '1190', '1210',
+            '1800', '1830', '1831', '1850', '1853', '1930', '1931', '1932',
+            '1933',
         ],
     },
     'D': {
@@ -41,9 +43,56 @@ POSTAL_GROUPS: dict[str, dict] = {
     },
 }
 
+# City labels — required for the Supabase `postal_codes_whitelist` seed (site 4).
+# MUST cover exactly the codes in POSTAL_GROUPS (enforced by _validate_cities()).
+POSTAL_CITIES: dict[str, str] = {
+    # Group A
+    '1180': 'Uccle / Ukkel', '1160': 'Auderghem / Oudergem',
+    '1170': 'Watermael-Boitsfort / Watermaal-Bosvoorde', '1500': 'Halle',
+    '1630': 'Linkebeek', '1640': 'Rhode-Saint-Genèse / Sint-Genesius-Rode',
+    '2830': 'Willebroek', '3070': 'Kortenberg', '1820': 'Steenokkerzeel',
+    '1840': 'Londerzeel', '1860': 'Meise', '1861': 'Wolvertem',
+    '1970': 'Wezembeek-Oppem', '1950': 'Kraainem', '1980': 'Zemst',
+    '1730': 'Asse', '1650': 'Beersel', '1785': 'Merchtem', '9300': 'Aalst',
+    # Group B
+    '1150': 'Woluwe-Saint-Pierre / Sint-Pieters-Woluwe',
+    '1200': 'Woluwe-Saint-Lambert / Sint-Lambrechts-Woluwe',
+    '1600': 'Sint-Pieters-Leeuw', '1700': 'Dilbeek', '1702': 'Dilbeek (Bodegem)',
+    '1731': 'Zellik', '1780': 'Wemmel', '1050': 'Ixelles / Elsene',
+    # Group C
+    '1000': 'Bruxelles (Centre) / Brussel', '1020': 'Laeken / Laken',
+    '1030': 'Schaerbeek / Schaarbeek', '1040': 'Etterbeek',
+    '1060': 'Saint-Gilles / Sint-Gillis', '1070': 'Anderlecht',
+    '1080': 'Molenbeek-Saint-Jean / Sint-Jans-Molenbeek', '1081': 'Koekelberg',
+    '1082': 'Berchem-Sainte-Agathe / Sint-Agatha-Berchem', '1083': 'Ganshoren',
+    '1090': 'Jette', '1120': 'Neder-Over-Heembeek', '1130': 'Haren',
+    '1140': 'Evere', '1190': 'Forest / Vorst',
+    '1210': 'Saint-Josse-ten-Noode / Sint-Joost-ten-Node', '1800': 'Vilvoorde',
+    '1830': 'Machelen', '1831': 'Diegem', '1850': 'Grimbergen',
+    '1853': 'Strombeek-Bever', '1930': 'Zaventem', '1931': 'Zaventem (Nossegem)',
+    '1932': 'Sint-Stevens-Woluwe', '1933': 'Sterrebeek',
+    # Group D
+    '1410': 'Waterloo',
+}
+
 
 def total_codes() -> int:
     return sum(len(d['codes']) for d in POSTAL_GROUPS.values())
+
+
+def _validate_cities() -> None:
+    """Drift gate: POSTAL_CITIES must cover EXACTLY the POSTAL_GROUPS codes.
+    Adding a code to POSTAL_GROUPS without a city (or vice-versa) fails at import."""
+    src = {c for grp in POSTAL_GROUPS.values() for c in grp['codes']}
+    missing = src - set(POSTAL_CITIES)
+    extra = set(POSTAL_CITIES) - src
+    if missing:
+        raise ValueError(f"POSTAL_CITIES missing city label(s) for code(s): {sorted(missing)}")
+    if extra:
+        raise ValueError(f"POSTAL_CITIES has code(s) not in POSTAL_GROUPS: {sorted(extra)}")
+
+
+_validate_cities()  # fail fast at import if code/city sets diverge
 
 
 def all_pairs() -> Iterable[tuple[str, str]]:
@@ -100,6 +149,35 @@ def render_confirmation_block(indent: str = '     ') -> str:
         codes_str = ' '.join(data['codes'])
         out.append(f"{indent}Group {grp}: {codes_str}")
     return '\n'.join(out)
+
+
+def render_postal_seed_sql() -> str:
+    """Site 4 — Supabase `postal_codes_whitelist` seed INSERT.
+
+    Generates a global-default (company_id NULL) upsert for every code in
+    POSTAL_GROUPS, using POSTAL_CITIES for the city label and the group's
+    min_eur. The ON CONFLICT targets the partial unique index
+    `uniq_global_postal_code` (code WHERE company_id IS NULL) introduced in
+    migration 20260608120000 — that index MUST exist for this upsert to be
+    idempotent for global rows.
+    """
+    rows = []
+    for grp, data in POSTAL_GROUPS.items():
+        min_eur = data['min_eur']
+        for code in data['codes']:
+            city = POSTAL_CITIES[code].replace("'", "''")  # SQL-escape apostrophes
+            rows.append(f"    (NULL, '{code}', '{city}', '{grp}', {min_eur})")
+    header = ("INSERT INTO public.postal_codes_whitelist "
+              "(company_id, code, city, delivery_group, min_order_eur) VALUES")
+    tail = (
+        "ON CONFLICT (code) WHERE company_id IS NULL\n"
+        "DO UPDATE SET\n"
+        "    city           = EXCLUDED.city,\n"
+        "    delivery_group = EXCLUDED.delivery_group,\n"
+        "    min_order_eur  = EXCLUDED.min_order_eur,\n"
+        "    is_active      = TRUE;"
+    )
+    return header + "\n" + ",\n".join(rows) + "\n" + tail
 
 
 # =====================================================================
